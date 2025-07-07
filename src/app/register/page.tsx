@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from "react";
@@ -8,6 +7,19 @@ import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+import * as yup from "yup";
+
+// ✅ Validation Schema using Yup
+const validationSchema = yup.object().shape({
+  name: yup.string().min(3, "Full Name must be at least 3 characters").required("Full Name is required"),
+  email: yup.string().email("Invalid email address").required("Email is required"),
+  password: yup
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .matches(/[A-Z]/, "Must contain at least one uppercase letter")
+    .matches(/[0-9]/, "Must contain at least one number")
+    .required("Password is required"),
+});
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -24,23 +36,27 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
+      // ✅ Validate inputs
+      await validationSchema.validate(form, { abortEarly: false });
+
       const res = await fetch('http://localhost:5000/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
+
       const data = await res.json();
 
       if (res.ok) {
         Swal.fire({
           icon: 'success',
           title: 'Registered Successfully!',
-          text: data.msg || 'Redirecting to login...',
-          timer: 3000,
+          text: 'A confirmation email has been sent. Please verify to continue.',
+          timer: 3500,
           showConfirmButton: false,
           timerProgressBar: true,
         });
-        setTimeout(() => router.push('/login'), 3500);
+        setTimeout(() => router.push('/login'), 4000);
       } else {
         Swal.fire({
           icon: 'error',
@@ -48,13 +64,21 @@ export default function RegisterPage() {
           text: data.msg || 'Please try again.',
         });
       }
-    } catch (err) {
-      console.error(err);
-      Swal.fire({
-        icon: 'error',
-        title: 'Network Error',
-        text: 'Something went wrong. Please try again.',
-      });
+    } catch (err: any) {
+      if (err.name === 'ValidationError') {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Validation Error',
+          html: err.errors.join('<br>'),
+        });
+      } else {
+        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Network Error',
+          text: 'Something went wrong. Please try again.',
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -71,7 +95,6 @@ export default function RegisterPage() {
           </p>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
-            {/* Full Name */}
             <div>
               <label className="text-sm text-gray-700 block mb-1">Full Name</label>
               <input
@@ -85,7 +108,6 @@ export default function RegisterPage() {
               />
             </div>
 
-            {/* Email */}
             <div>
               <label className="text-sm text-gray-700 block mb-1">Email</label>
               <input
@@ -99,7 +121,6 @@ export default function RegisterPage() {
               />
             </div>
 
-            {/* Password */}
             <div>
               <label className="text-sm text-gray-700 block mb-1">Password</label>
               <div className="relative">
@@ -123,7 +144,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
