@@ -1,6 +1,5 @@
-'use client';
 
-import { useEffect, useState } from 'react';
+'use client';
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 
@@ -40,13 +39,8 @@ const schedules = [
 const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
 export default function SchedulePage() {
-  const [currentDay, setCurrentDay] = useState<string>('');
-
-  useEffect(() => {
-    const today = new Date();
-    const todayName = days[today.getDay()];
-    setCurrentDay(todayName);
-  }, []);
+  const today = new Date();
+  const currentDay = days[today.getDay()];
 
   return (
     <>
@@ -54,10 +48,9 @@ export default function SchedulePage() {
       <main className="min-h-[85vh] bg-gradient-to-br from-blue-100 to-white px-4 py-12">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-4xl font-bold text-blue-800 mb-4">🕒 Libreng Sakay Bus Schedules</h1>
-          <p className="text-gray-600 mb-10 text-sm md:text-base">
-            Check real-time operating hours for each route. Today's schedule is highlighted.
-          </p>
-
+              <p className="text-gray-600 mb-10 text-sm md:text-base">
+        Check real-time operating hours for each route. Today&apos;s schedule is highlighted.
+      </p>
           <div className="overflow-x-auto rounded-lg shadow-xl border border-gray-100">
             <table className="min-w-full bg-white text-sm md:text-sm lg:text-base">
               <thead>
@@ -99,7 +92,7 @@ export default function SchedulePage() {
           </div>
 
           <p className="mt-4 text-sm text-gray-500 italic">
-            Last checked: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            Last checked: {today.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </p>
         </div>
       </main>

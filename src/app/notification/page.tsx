@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
-import { BellRing, Clock, MapPin } from 'lucide-react';
+import { BellRing, Clock } from 'lucide-react';
 
 interface Notification {
   id: number;
