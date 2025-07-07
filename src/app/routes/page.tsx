@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
+import { Bus, RefreshCcw, MapPin } from "lucide-react"; // Optional icons if you're using Lucide
 
 type Stop = {
   name: string;
@@ -76,17 +77,19 @@ export default function RoutesPage() {
     <>
       <Navbar />
       <main className="min-h-[85vh] bg-gradient-to-br from-blue-100 to-white px-4 py-12">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl font-bold text-blue-800 mb-4">🚌 Libreng Sakay Tracker</h1>
-          <p className="text-gray-600 mb-8 text-sm md:text-base">
-            View your bus route below and track when it arrives — real time.
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl font-extrabold text-blue-800 mb-2 flex items-center justify-center gap-2">
+            <Bus className="w-8 h-8 text-blue-600" /> Libreng Sakay Tracker
+          </h1>
+          <p className="text-gray-700 mb-10 text-base md:text-lg max-w-xl mx-auto">
+            View your bus route below and track when it arrives — updated in real-time every 30 seconds.
           </p>
 
-          {/* Dropdown */}
-          <div className="mb-6 text-left">
-            <label className="block mb-2 text-sm font-medium text-gray-700">Select a route:</label>
+          {/* Route Selector */}
+          <div className="mb-8 text-left">
+            <label className="block mb-2 text-sm font-medium text-gray-800">Choose your route:</label>
             <select
-              className="w-full px-4 py-3 border border-blue-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800 text-sm"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm"
               value={selectedRouteId ?? ''}
               onChange={(e) => setSelectedRouteId(Number(e.target.value))}
             >
@@ -98,22 +101,42 @@ export default function RoutesPage() {
             </select>
           </div>
 
+          {/* Refresh Button */}
+          <div className="flex justify-end mb-6">
+            <button
+              onClick={generateRoutes}
+              className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-all text-sm"
+            >
+              <RefreshCcw className="w-4 h-4" /> Refresh Now
+            </button>
+          </div>
+
           {/* Route Display */}
           {selectedRoute && (
             <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-xl text-left transition-all duration-300">
-              <h2 className="text-xl font-bold text-blue-700 mb-4">🛣️ {selectedRoute.name}</h2>
-              <ul className="space-y-3 text-sm text-gray-700">
+              <h2 className="text-2xl font-semibold text-blue-700 mb-6 flex items-center gap-2">
+                🛣️ {selectedRoute.name}
+              </h2>
+
+              <ol className="relative border-l-4 border-blue-400 ml-2 space-y-6">
                 {selectedRoute.stops.map((stop, index) => (
-                  <li key={index} className="flex items-center justify-between border-b pb-2">
-                    <span>🟢 <strong>{stop.name}</strong></span>
-                    <span className="text-green-600 font-semibold">
-                      {formatArrivalTime(stop.arrivalTimestamp)}
-                    </span>
+                  <li key={index} className="ml-4">
+                    <div className="absolute w-4 h-4 bg-blue-500 rounded-full left-[-9px] top-1.5 border-2 border-white"></div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-900 font-medium">
+                        <MapPin className="inline w-4 h-4 mr-1 text-blue-500" />
+                        {stop.name}
+                      </span>
+                      <span className="text-green-600 font-semibold text-sm">
+                        {formatArrivalTime(stop.arrivalTimestamp)}
+                      </span>
+                    </div>
                   </li>
                 ))}
-              </ul>
-              <p className="text-xs text-gray-400 mt-4 text-right">
-                Auto-updated every 30s
+              </ol>
+
+              <p className="text-xs text-gray-400 mt-6 text-right">
+                Auto-refreshes every 30 seconds
               </p>
             </div>
           )}
