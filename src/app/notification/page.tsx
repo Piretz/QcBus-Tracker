@@ -23,25 +23,36 @@ interface Bus {
   route: string;
 }
 
-// 🚌 Simulated real-time bus list (can be replaced with live API data)
+// 🚌 Simulated real-time bus list
 const buses: Bus[] = [
   { id: 1, lat: 14.651, lng: 121.049, route: 'UP Diliman - City Hall' },
   { id: 2, lat: 14.654, lng: 121.060, route: 'Quezon Ave - Welcome Rotonda' },
   { id: 3, lat: 14.646, lng: 121.050, route: 'QC Hall - East Ave' },
 ];
 
-// 📍 Distance calculator
+// ⚠️ Simulated incident alerts
+const incidentAlerts: Notification[] = [
+  {
+    id: 101,
+    message: "⚠️ Delay reported on Route: QC Hall - East Ave due to traffic congestion.",
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  },
+  {
+    id: 102,
+    message: "🚧 Accident near Welcome Rotonda. Expect delays on Quezon Ave.",
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  },
+];
+
 function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const toRad = (val: number) => (val * Math.PI) / 180;
   const R = 6371;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
-
   const a =
     Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
   return R * c;
 }
 
@@ -50,6 +61,7 @@ export default function NotificationsPage() {
   const [userLocation, setUserLocation] = useState<Location | null>(null);
   const [notifiedBusIds, setNotifiedBusIds] = useState<Set<number>>(new Set());
 
+  // 👣 Get user location
   useEffect(() => {
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -67,6 +79,7 @@ export default function NotificationsPage() {
     }
   }, []);
 
+  // 🚌 Notify if bus is near
   useEffect(() => {
     if (!userLocation) return;
 
@@ -98,10 +111,19 @@ export default function NotificationsPage() {
       });
 
       setNotifiedBusIds(newNotified);
-    }, 10000); // every 10 seconds
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [userLocation, notifiedBusIds]);
+
+  // ⚠️ Add incident alerts on mount
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setNotifications((prev) => [...incidentAlerts, ...prev]);
+    }, 3000); // Show after 3 seconds
+
+    return () => clearTimeout(delay);
+  }, []);
 
   return (
     <>
