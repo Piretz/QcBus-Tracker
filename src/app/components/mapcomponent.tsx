@@ -11,7 +11,6 @@ const TileLayer = dynamic(() => import('react-leaflet').then(m => m.TileLayer), 
 const Marker = dynamic(() => import('react-leaflet').then(m => m.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(m => m.Popup), { ssr: false });
 const Polyline = dynamic(() => import('react-leaflet').then(m => m.Polyline), { ssr: false });
-// const GeolocateControl = dynamic(() => import('react-leaflet').then(m => m.GeolocateControl), { ssr: false });
 
 // Mock QC route coordinates and stops
 const routeCoordinates: [number, number][] = [
@@ -87,11 +86,6 @@ export default function MapComponent() {
     return () => clearInterval(interval);
   }, [isClient]);
 
-  const handleGeolocation = () => {
-    // This can trigger the map to center on user's location
-    // Make sure to use geolocation APIs to get the user's location
-  };
-
   if (!isClient) return <div className="h-[600px]">Loading map...</div>;
 
   return (
@@ -120,9 +114,6 @@ export default function MapComponent() {
             </Popup>
           </Marker>
         ))}
-
-        {/* Geolocation Button (not implemented, as GeolocateControl does not exist in react-leaflet) */}
-        {/* You can implement geolocation using the browser's Geolocation API or a supported leaflet plugin */}
       </MapContainer>
     </div>
   );
