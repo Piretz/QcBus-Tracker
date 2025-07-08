@@ -187,19 +187,16 @@ export default function RoutesPage() {
                       <span className="text-gray-900 font-medium text-base">{stop.name}</span>
                     </div>
 
-                    {!isClosed && stop.arrivalTimestamp > 0 ? (
-                      <div className="text-right text-sm sm:text-base text-green-700 space-y-0 sm:space-y-0 sm:flex sm:flex-col sm:items-end font-semibold">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4 text-green-600" />
-                          <span>{formatTimeDiff(stop.arrivalTimestamp)}</span>
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          Arrives at {formatArrivalTime(stop.arrivalTimestamp)}
-                        </div>
+                    {/* Time Display for Each Stop */}
+                    <div className="text-right text-sm sm:text-base text-green-700 space-y-0 sm:space-y-0 sm:flex sm:flex-col sm:items-end font-semibold">
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4 text-green-600" />
+                        <span>{formatTimeDiff(stop.arrivalTimestamp)}</span>
                       </div>
-                    ) : (
-                      <div className="text-sm text-gray-500">--:--</div>
-                    )}
+                      <div className="text-xs text-gray-600">
+                        Arrives at {formatArrivalTime(stop.arrivalTimestamp)}
+                      </div>
+                    </div>
                   </li>
                 ))}
               </ol>
