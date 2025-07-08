@@ -36,20 +36,7 @@ const fetchBusLocations = (): Promise<Bus[]> =>
     }, 1000);
   });
 
-const incidentAlerts: Notification[] = [
-  {
-    id: 101,
-    message: "🚧 Accident near Welcome Rotonda. Expect delays on Quezon Ave.",
-    type: 'alert',
-    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  },
-  {
-    id: 102,
-    message: "⚠️ Delay reported on QC Hall - East Ave due to traffic.",
-    type: 'alert',
-    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  },
-];
+
 
 function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const toRad = (val: number) => (val * Math.PI) / 180;
@@ -60,6 +47,12 @@ function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: num
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
+
+// Simulated destination (you can allow users to set this later)
+const destination: Location = {
+  lat: 14.6548,
+  lng: 121.0647,
+};
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -86,22 +79,36 @@ export default function NotificationsPage() {
       const newNotified = new Set(notifiedBusIds);
 
       buses.forEach((bus) => {
-        const distance = calculateDistanceKm(userLocation.lat, userLocation.lng, bus.lat, bus.lng);
+        const userDistance = calculateDistanceKm(userLocation.lat, userLocation.lng, bus.lat, bus.lng);
+        const destDistance = calculateDistanceKm(destination.lat, destination.lng, bus.lat, bus.lng);
+        const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-        if (distance <= 1.0 && !notifiedBusIds.has(bus.id)) {
-          const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
+        // Near current location
+        if (userDistance <= 1.0 && !notifiedBusIds.has(bus.id)) {
           setNotifications((prev) => [
             {
               id: Date.now(),
-              message: `🚌 Bus #${bus.id} is nearby!\n🗺️ ${bus.route}\n📍 (${bus.lat.toFixed(4)}, ${bus.lng.toFixed(4)})`,
+              message: `🚌 Bus #${bus.id} is near your current location!\n🗺️ ${bus.route}`,
               type: 'bus',
               time: now,
             },
             ...prev,
           ]);
-
           newNotified.add(bus.id);
+        }
+
+        // Near destination
+        if (destDistance <= 0.8 && !notifiedBusIds.has(bus.id + 1000)) {
+          setNotifications((prev) => [
+            {
+              id: Date.now(),
+              message: `📍 Bus #${bus.id} is approaching your destination!\n🗺️ ${bus.route}`,
+              type: 'bus',
+              time: now,
+            },
+            ...prev,
+          ]);
+          newNotified.add(bus.id + 1000);
         }
       });
 
@@ -111,26 +118,21 @@ export default function NotificationsPage() {
     return () => clearInterval(interval);
   }, [userLocation, notifiedBusIds]);
 
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      setNotifications((prev) => [...incidentAlerts, ...prev]);
-    }, 3000);
-    return () => clearTimeout(delay);
-  }, []);
+  
 
   return (
     <>
       <Navbar />
-          <main className="min-h-[85vh] bg-gradient-to-br from-blue-50 to-white px-4 py-12">
-          <div className="max-w-4xl mx-auto text-center">
-      <h1 className="text-4xl font-bold text-blue-800 mb-6 flex justify-center items-center gap-2">
-        <BellRing className="text-yellow-400" size={34} />
-        Live Notifications
-      </h1>
+      <main className="min-h-[85vh] bg-gradient-to-br from-blue-50 to-white px-4 py-12">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl font-bold text-blue-800 mb-6 flex justify-center items-center gap-2">
+            <BellRing className="text-yellow-400" size={34} />
+            Live Notifications
+          </h1>
 
           {notifications.length === 0 ? (
             <div className="text-gray-600 text-sm mt-8">
-              No alerts yet. We’ll notify you once a bus is near your location!
+              No alerts yet. We’ll notify you once a bus is near your location or destination!
             </div>
           ) : (
             <ul className="mt-8 space-y-4 text-left">
@@ -144,7 +146,11 @@ export default function NotificationsPage() {
                   }`}
                 >
                   <div className="text-2xl">
-                    {note.type === 'alert' ? <AlertTriangle className="text-red-500" /> : <BusFront className="text-blue-500" />}
+                    {note.type === 'alert' ? (
+                      <AlertTriangle className="text-red-500" />
+                    ) : (
+                      <BusFront className="text-blue-500" />
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="text-gray-800 whitespace-pre-line font-medium">{note.message}</p>

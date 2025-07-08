@@ -1,6 +1,7 @@
 'use client';
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
+
+import Navbar from '../components/navbar';
+import Footer from '../components/footer';
 
 const schedules = [
   {
@@ -44,24 +45,30 @@ export default function SchedulePage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-[85vh] bg-gradient-to-br from-blue-100 to-white px-4 py-12">
-        <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-4xl font-extrabold text-blue-800 mb-3 flex items-center justify-center gap-2">
-            🕒 Libreng Sakay Bus Schedules
-          </h1>
-          <p className="text-gray-700 mb-10 text-sm md:text-base max-w-2xl mx-auto">
-            Check real-time operating hours for each route. Today’s schedule is <span className="font-semibold text-blue-700">highlighted</span>.
-          </p>
+      <main className="min-h-[85vh] bg-gradient-to-br from-blue-100 via-white to-blue-50 px-4 py-12">
+        <div className="max-w-6xl mx-auto text-center space-y-8">
+          <div>
+            <h1 className="text-4xl font-extrabold text-blue-800 flex items-center justify-center gap-2">
+              🕒 Libreng Sakay Bus Schedules
+            </h1>
+            <p className="text-gray-700 text-sm md:text-base mt-2 max-w-xl mx-auto">
+              Check real-time operating hours for each route. Today’s schedule is{' '}
+              <span className="font-semibold text-blue-700">highlighted</span>.
+            </p>
+          </div>
 
-          <div className="overflow-x-auto border border-gray-200 rounded-xl shadow-lg">
-            <table className="min-w-full bg-white text-sm md:text-sm lg:text-base">
-              <thead>
-                <tr className="bg-blue-700 text-white text-left">
-                  <th className="py-4 px-5 text-base font-semibold whitespace-nowrap">🛣️ Route</th>
-                  {days.map(day => (
+          {/* Schedule Table */}
+          <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-xl">
+            <table className="min-w-full text-sm md:text-base bg-white table-fixed">
+              <thead className="bg-blue-700 text-white sticky top-0 z-30">
+                <tr>
+                  <th className="py-4 px-5 text-left font-semibold whitespace-nowrap w-64 sticky left-0 z-40 bg-blue-700">
+                    🛣️ Route
+                  </th>
+                  {days.map((day) => (
                     <th
                       key={day}
-                      className={`py-4 px-5 capitalize text-sm font-medium tracking-wide ${
+                      className={`py-4 px-3 capitalize font-medium text-center ${
                         currentDay === day ? 'bg-blue-900 text-yellow-300' : ''
                       }`}
                     >
@@ -76,12 +83,14 @@ export default function SchedulePage() {
                     key={index}
                     className="border-t border-gray-200 hover:bg-blue-50 transition duration-150"
                   >
-                    <td className="py-3 px-5 font-semibold text-gray-800">{schedule.route}</td>
-                    {days.map(day => (
+                    <td className="py-3 px-5 text-left font-semibold text-gray-800 sticky left-0 bg-white z-20 border-r border-gray-200">
+                      {schedule.route}
+                    </td>
+                    {days.map((day) => (
                       <td
                         key={day}
-                        className={`py-3 px-5 text-gray-700 text-sm text-center ${
-                          currentDay === day ? 'font-bold text-blue-800 bg-blue-50' : ''
+                        className={`py-3 px-3 text-center text-gray-700 ${
+                          currentDay === day ? 'bg-blue-50 font-semibold text-blue-800' : ''
                         }`}
                       >
                         {schedule[day as keyof typeof schedule]}
@@ -93,8 +102,9 @@ export default function SchedulePage() {
             </table>
           </div>
 
-          <p className="mt-6 text-sm text-gray-500 italic">
-            📅 Last checked:{" "}
+          {/* Timestamp */}
+          <p className="text-sm text-gray-500 italic">
+            📅 Last checked:{' '}
             <span className="text-gray-700 font-medium">
               {today.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
