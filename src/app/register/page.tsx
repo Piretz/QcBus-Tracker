@@ -31,57 +31,57 @@ export default function RegisterPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      // ✅ Validate inputs
-      await validationSchema.validate(form, { abortEarly: false });
-      
-      const res = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+  try {
+    // ✅ Validate inputs
+    await validationSchema.validate(form, { abortEarly: false });
+
+    const res = await fetch('http://localhost:5000/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Registered Successfully!',
+        text: 'A confirmation email has been sent. Please verify to continue.',
+        timer: 3500,
+        showConfirmButton: false,
+        timerProgressBar: true,
       });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Registered Successfully!',
-          text: 'A confirmation email has been sent. Please verify to continue.',
-          timer: 3500,
-          showConfirmButton: false,
-          timerProgressBar: true,
-        });
-        setTimeout(() => router.push('/login'), 4000);
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Registration Failed',
-          text: data.msg || 'Please try again.',
-        });
-      }
-    } catch (err: any) {
-      if (err.name === 'ValidationError') {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Validation Error',
-          html: err.errors.join('<br>'),
-        });
-      } else {
-        console.error(err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Network Error',
-          text: 'Something went wrong. Please try again.',
-        });
-      }
-    } finally {
-      setLoading(false);
+      setTimeout(() => router.push('/login'), 4000);
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Registration Failed',
+        text: data.msg || 'Please try again.',
+      });
     }
+  } catch (err) {
+    if (err instanceof yup.ValidationError) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        html: err.errors.join('<br>'),
+      });
+    } else {
+      console.error(err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Network Error',
+        text: 'Something went wrong. Please try again.',
+      });
+    }
+  } finally {
+    setLoading(false);
+  }
   };
 
   return (
