@@ -201,18 +201,6 @@ export default function RoutesPage() {
                 ))}
               </ol>
 
-              {/* Final ETA */}
-              {!isClosed &&
-                selectedRoute.stops.length > 0 &&
-                selectedRoute.stops[selectedRoute.stops.length - 1].arrivalTimestamp > 0 && (
-                  <div className="mt-8 text-right">
-                    <h3 className="text-sm text-blue-800 font-semibold">🕒 Estimated Arrival at Final Destination:</h3>
-                    <p className="text-base font-bold text-green-700">
-                      {formatArrivalTime(selectedRoute.stops[selectedRoute.stops.length - 1].arrivalTimestamp)}
-                    </p>
-                  </div>
-              )}
-
               <p className="text-xs text-gray-400 mt-6 text-right">
                 {isClosed ? 'Live tracking unavailable after 9 PM' : 'Auto-refreshes every 30 seconds'}
               </p>

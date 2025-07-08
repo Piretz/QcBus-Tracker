@@ -12,24 +12,25 @@ const Marker = dynamic(() => import('react-leaflet').then(m => m.Marker), { ssr:
 const Popup = dynamic(() => import('react-leaflet').then(m => m.Popup), { ssr: false });
 const Polyline = dynamic(() => import('react-leaflet').then(m => m.Polyline), { ssr: false });
 
-// Mock QC route coordinates and stops
+// Coordinates for QC route
 const routeCoordinates: [number, number][] = [
-  [14.6760, 121.0437], // QC Hall
-  [14.6815, 121.0566],
-  [14.6891, 121.0582],
-  [14.6955, 121.0621],
-  [14.7037, 121.0800],
-  [14.7112, 121.0754],
-  [14.7193, 121.0617], // Katipunan
+  [14.6994, 121.0359], // SM North EDSA
+  [14.6933, 121.0395], // Munoz
+  [14.6868, 121.0426], // Roosevelt / Del Monte
+  [14.6760, 121.0437], // Quezon City Hall
+  [14.6700, 121.0505], // Quezon Avenue
+  [14.6549, 121.0526], // Timog Ave
+  [14.6474, 121.0563], // Kamuning
+  [14.6396, 121.0560], // Cubao
+  [14.6312, 121.0581], // Anonas
+  [14.6255, 121.0611], // Katipunan Avenue
+  [14.6192, 121.0698], // UP Town Center
+  [14.6130, 121.0805], // La Vista / Marikina boundary
 ];
 
-// List of bus icon files (place these in /public directory)
+// Bus icons
 const busIcons = [
-  '/bus.png',
-  '/bus.png',
-  '/bus.png',
-  '/bus.png',
-  '/bus.png'
+  '/bus.png', '/bus.png', '/bus.png', '/bus.png', '/bus.png'
 ];
 
 // Helper to create a Leaflet icon from an image
@@ -96,13 +97,13 @@ export default function MapComponent() {
           attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
         />
 
-        {/* Route path */}
+        {/* Dashed Route Path */}
         <Polyline
           positions={routeCoordinates}
           pathOptions={{ color: 'blue', weight: 5, dashArray: '6 8', opacity: 0.7 }}
         />
 
-        {/* Live-moving buses with custom icons */}
+        {/* Bus Markers */}
         {buses.map(bus => (
           <Marker key={bus.id} position={bus.position} icon={bus.icon}>
             <Popup>
