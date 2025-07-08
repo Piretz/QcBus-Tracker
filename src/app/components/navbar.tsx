@@ -67,7 +67,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="bg-blue-700 text-white shadow-md sticky top-0 z-50">
+    <nav className="bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-lg sticky top-0 z-50 backdrop-blur-md bg-opacity-80">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
         {/* Logo / Brand */}
         <Link href="/" className="text-2xl font-bold tracking-tight flex items-center space-x-2">
@@ -76,17 +76,20 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex space-x-6 items-center">
+        <div className="hidden md:flex space-x-4 items-center">
           {navLinks.map((link) => (
             <Link
               key={link.path}
               href={link.path}
-              className={`px-3 py-1 rounded-lg text-sm transition-all duration-200 ${
+              className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                 pathname === link.path
-                  ? 'bg-white text-blue-700 font-semibold shadow-sm'
+                  ? 'bg-white text-blue-700 shadow-sm'
                   : 'hover:bg-blue-600 hover:text-white'
               }`}
             >
+              {pathname === link.path && (
+                <span className="absolute left-0 top-0 h-full w-1 bg-white rounded-r-lg" />
+              )}
               {link.name}
             </Link>
           ))}
@@ -103,20 +106,19 @@ export default function Navbar() {
 
       {/* Mobile Dropdown Menu */}
       <div
-        className={`md:hidden px-4 pt-2 pb-4 bg-blue-600 transition-all duration-300 overflow-hidden rounded-b-2xl shadow-lg ${
-          menuOpen ? 'max-h-[500px]' : 'max-h-0'
-        }`}
-        style={{ transitionProperty: 'max-height' }}
+        className={`md:hidden bg-blue-600 overflow-hidden transition-all duration-500 ease-in-out ${
+          menuOpen ? 'max-h-[500px] py-4 px-4' : 'max-h-0 py-0 px-4'
+        } rounded-b-2xl shadow-lg`}
       >
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col space-y-3">
           {navLinks.map((link) => (
             <Link
               key={link.path}
               href={link.path}
               onClick={() => setMenuOpen(false)}
-              className={`block py-2 px-3 rounded-lg text-sm transition-all ${
+              className={`block py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                 pathname === link.path
-                  ? 'bg-white text-blue-700 font-semibold'
+                  ? 'bg-white text-blue-700 shadow-sm'
                   : 'text-white hover:bg-blue-500'
               }`}
             >
