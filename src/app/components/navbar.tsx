@@ -21,7 +21,6 @@ export default function Navbar() {
 
   useEffect(() => {
     const hasRequestedLocation = localStorage.getItem('locationRequested');
-
     if (!hasRequestedLocation && typeof window !== 'undefined') {
       Swal.fire({
         title: 'Enable Location?',
@@ -33,7 +32,6 @@ export default function Navbar() {
         allowOutsideClick: false,
       }).then((result) => {
         localStorage.setItem('locationRequested', 'true');
-
         if (result.isConfirmed) {
           if ('geolocation' in navigator) {
             navigator.geolocation.getCurrentPosition(
@@ -67,49 +65,49 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-lg sticky top-0 z-50 backdrop-blur-md bg-opacity-80">
+    <nav className="sticky top-0 z-50 bg-blue-700 text-white shadow-lg">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
-        {/* Logo / Brand */}
-        <Link href="/" className="text-2xl font-bold tracking-tight flex items-center space-x-2">
+        {/* Logo */}
+        <Link
+          href="/"
+          className="text-2xl font-bold tracking-tight flex items-center space-x-2 hover:scale-105 transition-transform"
+        >
           <span>🚍</span>
           <span className="font-extrabold">Libreng Sakay QC</span>
         </Link>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex space-x-4 items-center">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex space-x-6 items-center">
           {navLinks.map((link) => (
             <Link
               key={link.path}
               href={link.path}
-              className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                 pathname === link.path
-                  ? 'bg-white text-blue-700 shadow-sm'
-                  : 'hover:bg-blue-600 hover:text-white'
+                  ? 'bg-white text-blue-700 shadow-md'
+                  : 'hover:bg-blue-600 hover:text-white text-white/90'
               }`}
             >
-              {pathname === link.path && (
-                <span className="absolute left-0 top-0 h-full w-1 bg-white rounded-r-lg" />
-              )}
               {link.name}
             </Link>
           ))}
         </div>
 
-        {/* Mobile Menu Toggle */}
+        {/* Mobile Toggle Button */}
         <button
-          className="md:hidden text-white focus:outline-none"
+          className="md:hidden text-white focus:outline-none focus:ring-2 focus:ring-white rounded-md"
           onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle mobile menu"
+          aria-label="Toggle menu"
         >
-          {menuOpen ? <X size={26} /> : <Menu size={26} />}
+          {menuOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
 
-      {/* Mobile Dropdown Menu */}
+      {/* Mobile Menu */}
       <div
-        className={`md:hidden bg-blue-600 overflow-hidden transition-all duration-500 ease-in-out ${
-          menuOpen ? 'max-h-[500px] py-4 px-4' : 'max-h-0 py-0 px-4'
-        } rounded-b-2xl shadow-lg`}
+        className={`md:hidden bg-blue-700 overflow-hidden transition-all duration-500 ease-in-out ${
+          menuOpen ? 'max-h-[400px] py-4 px-4' : 'max-h-0 py-0 px-4'
+        }`}
       >
         <div className="flex flex-col space-y-3">
           {navLinks.map((link) => (
@@ -117,7 +115,7 @@ export default function Navbar() {
               key={link.path}
               href={link.path}
               onClick={() => setMenuOpen(false)}
-              className={`block py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+              className={`block px-4 py-2 text-sm rounded-lg font-medium transition-all ${
                 pathname === link.path
                   ? 'bg-white text-blue-700 shadow-sm'
                   : 'text-white hover:bg-blue-500'

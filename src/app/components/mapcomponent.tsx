@@ -14,39 +14,32 @@ const Polyline = dynamic(() => import('react-leaflet').then(m => m.Polyline), { 
 
 // Coordinates for QC route
 const routeCoordinates: [number, number][] = [
-  [14.6994, 121.0359], // SM North EDSA
-  [14.6933, 121.0395], // Munoz
-  [14.6868, 121.0426], // Roosevelt / Del Monte
-  [14.6760, 121.0437], // Quezon City Hall
-  [14.6700, 121.0505], // Quezon Avenue
-  [14.6549, 121.0526], // Timog Ave
-  [14.6474, 121.0563], // Kamuning
-  [14.6396, 121.0560], // Cubao
-  [14.6312, 121.0581], // Anonas
-  [14.6255, 121.0611], // Katipunan Avenue
-  [14.6192, 121.0698], // UP Town Center
-  [14.6130, 121.0805], // La Vista / Marikina boundary
+  [14.6994, 121.0359],
+  [14.6933, 121.0395],
+  [14.6868, 121.0426],
+  [14.6760, 121.0437],
+  [14.6700, 121.0505],
+  [14.6549, 121.0526],
+  [14.6474, 121.0563],
+  [14.6396, 121.0560],
+  [14.6312, 121.0581],
+  [14.6255, 121.0611],
+  [14.6192, 121.0698],
+  [14.6130, 121.0805],
 ];
 
-// Bus icons
-const busIcons = [
-  '/bus.png', '/bus.png', '/bus.png', '/bus.png', '/bus.png'
-];
-
-// Helper to create a Leaflet icon from an image
-const createBusIcon = (url: string) =>
-  new Icon({
-    iconUrl: url,
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-  });
+// Custom station icon
+const stationIcon = new Icon({
+  iconUrl: '/mark.png',
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+});
 
 type Bus = {
   id: number;
   position: [number, number];
   routeIndex: number;
-  icon: Icon;
-  eta: number; // Estimated time of arrival at the next stop
+  eta: number;
 };
 
 export default function MapComponent() {
@@ -60,13 +53,11 @@ export default function MapComponent() {
   useEffect(() => {
     if (!isClient) return;
 
-    // Initialize buses with random icons and positions
     const initialBuses: Bus[] = Array.from({ length: 5 }, (_, i) => ({
       id: i + 1,
       position: routeCoordinates[i % routeCoordinates.length],
       routeIndex: i % routeCoordinates.length,
-      icon: createBusIcon(busIcons[i % busIcons.length]),
-      eta: Math.floor(Math.random() * 5) + 2, // Random ETA (2 to 6 minutes)
+      eta: Math.floor(Math.random() * 5) + 2,
     }));
     setBuses(initialBuses);
 
@@ -78,11 +69,11 @@ export default function MapComponent() {
             ...bus,
             position: routeCoordinates[nextIndex],
             routeIndex: nextIndex,
-            eta: Math.floor(Math.random() * 5) + 2, // Randomize ETA every update
+            eta: Math.floor(Math.random() * 5) + 2,
           };
         })
       );
-    }, 4000); // Move every 4 seconds
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [isClient]);
@@ -91,25 +82,32 @@ export default function MapComponent() {
 
   return (
     <div className="w-full h-[600px] rounded-lg overflow-hidden shadow-md">
-      <MapContainer center={[14.686, 121.06]} zoom={13} scrollWheelZoom={true} className="h-full w-full">
+      <MapContainer center={[14.686, 121.06]} zoom={13} scrollWheelZoom className="h-full w-full">
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
         />
 
-        {/* Dashed Route Path */}
+        {/* Dashed QC Route */}
         <Polyline
           positions={routeCoordinates}
           pathOptions={{ color: 'blue', weight: 5, dashArray: '6 8', opacity: 0.7 }}
         />
 
-        {/* Bus Markers */}
+        {/* Station Markers with custom icon */}
+        {routeCoordinates.map(([lat, lng], index) => (
+          <Marker key={`stop-${index}`} position={[lat, lng]} icon={stationIcon}>
+            <Popup>Bus Stop #{index + 1}</Popup>
+          </Marker>
+        ))}
+
+        {/* Optional: Real-time bus tracker with blue dot or emoji */}
         {buses.map(bus => (
-          <Marker key={bus.id} position={bus.position} icon={bus.icon}>
+          <Marker key={bus.id} position={bus.position}>
             <Popup>
               🚌 Bus #{bus.id}
               <br />
-              Heading to: {routeCoordinates[(bus.routeIndex + 1) % routeCoordinates.length].join(', ')}
+              Next stop: {routeCoordinates[(bus.routeIndex + 1) % routeCoordinates.length].join(', ')}
               <br />
               ETA: {bus.eta} minutes
             </Popup>
