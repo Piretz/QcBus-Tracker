@@ -64,6 +64,157 @@ const isOutsideOperatingHours = () => {
   return hour < 5 || hour >= 21;
 };
 
+const getTravelTimeInMinutes = (from: string, to: string, traffic: string): number => {
+  const key = `${from}→${to}`;
+ const estimates: Record<string, Record<'light' | 'moderate' | 'heavy', [number, number]>> = {
+  // Route 1
+  'Quezon Memorial Circle→Kalayaan Avenue': {
+    light: [10, 15],
+    moderate: [15, 25],
+    heavy: [25, 40],
+  },
+  'Kalayaan Avenue→Tomas Morato': {
+    light: [12, 18],
+    moderate: [18, 30],
+    heavy: [30, 45],
+  },
+  'Tomas Morato→St. Luke’s Medical Center': {
+    light: [5, 10],
+    moderate: [10, 15],
+    heavy: [15, 25],
+  },
+  'St. Luke’s Medical Center→Trinity University of Asia': {
+    light: [2, 5],
+    moderate: [2, 6],
+    heavy: [2, 6],
+  },
+  'Trinity University of Asia→Welcome Rotonda': {
+    light: [10, 15],
+    moderate: [15, 25],
+    heavy: [25, 35],
+  },
+
+  // Route 2
+  'Quezon Memorial Circle→University Avenue (UP Diliman)': {
+    light: [3, 6],
+    moderate: [6, 10],
+    heavy: [10, 15],
+  },
+  'University Avenue (UP Diliman)→CP Garcia Avenue': {
+    light: [3, 6],
+    moderate: [3, 6],
+    heavy: [3, 6],
+  },
+  'CP Garcia Avenue→UP Town Center': {
+    light: [4, 7],
+    moderate: [7, 12],
+    heavy: [12, 20],
+  },
+  'UP Town Center→Katipunan (LRT2 Station)': {
+    light: [5, 8],
+    moderate: [8, 15],
+    heavy: [15, 25],
+  },
+
+  // ✅ Route 3: QMC to Araneta-Cubao via East Avenue
+  'Quezon Memorial Circle→Philippine Heart Center': {
+    light: [3, 5],
+    moderate: [5, 10],
+    heavy: [10, 15],
+  },
+  'Philippine Heart Center→East Avenue Medical Center': {
+    light: [2, 5],
+    moderate: [2, 5],
+    heavy: [2, 5],
+  },
+  'East Avenue Medical Center→Land Transportation Office (LTO)': {
+    light: [2, 4],
+    moderate: [2, 4],
+    heavy: [2, 4],
+  },
+  'Land Transportation Office (LTO)→National Kidney Institute': {
+    light: [3, 5],
+    moderate: [3, 5],
+    heavy: [3, 5],
+  },
+  'National Kidney Institute→Araneta City / Cubao': {
+    light: [10, 15],
+    moderate: [15, 25],
+    heavy: [25, 40],
+  },
+
+  'Batasan Road (near Sandiganbayan)→IBP Road': {
+    light: [3, 5],
+    moderate: [5, 10],
+    heavy: [10, 18],
+  },
+  'IBP Road→Commonwealth Avenue': {
+    light: [3, 5],
+    moderate: [5, 10],
+    heavy: [10, 20],
+  },
+  'Commonwealth Avenue→Litex Market': {
+    light: [5, 8],
+    moderate: [8, 15],
+    heavy: [15, 25],
+  },
+  'Litex Market→Payatas Road Junction': {
+    light: [2, 4],
+    moderate: [4, 8],
+    heavy: [8, 15],
+  },
+
+  'Novaliches Bayan (Proper)→Tandang Sora Avenue': {
+    light: [12, 18],
+    moderate: [18, 30],
+    heavy: [30, 45],
+  },
+  'Tandang Sora Avenue→Mindanao Avenue': {
+    light: [5, 8],
+    moderate: [8, 15],
+    heavy: [15, 25],
+  },
+  'Mindanao Avenue→Visayas Avenue': {
+    light: [5, 8],
+    moderate: [8, 15],
+    heavy: [15, 25],
+  },
+  'Visayas Avenue→Quezon Memorial Circle': {
+    light: [6, 10],
+    moderate: [10, 15],
+    heavy: [15, 25],
+  },
+
+
+  'Quezon Memorial Circle→Philcoa': {
+    light: [3, 5],
+    moderate: [5, 8],
+    heavy: [8, 15],
+  },
+  'Philcoa→University of the Philippines (UP) Campus': {
+    light: [3, 5],
+    moderate: [5, 10],
+    heavy: [10, 15],
+  },
+  'University of the Philippines (UP) Campus→Katipunan Avenue': {
+    light: [5, 8],
+    moderate: [8, 15],
+    heavy: [15, 25],
+  },
+  'Katipunan Avenue→Balara Area': {
+    light: [4, 6],
+    moderate: [6, 12],
+    heavy: [12, 20],
+  },
+}
+type TrafficLevel = 'light' | 'moderate' | 'heavy';
+
+ const segment = estimates[key]?.[traffic as TrafficLevel];
+  if (!segment) return traffic === 'light' ? 5 : traffic === 'moderate' ? 8 : 12;
+  const [min, max] = segment;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
 export default function RoutesPage() {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [selectedRouteId, setSelectedRouteId] = useState<number | null>(1);
@@ -79,13 +230,20 @@ export default function RoutesPage() {
       ? 'heavy' : (hour >= 6 && hour < 7) || (hour > 10 && hour <= 16)
       ? 'moderate' : 'light';
 
-    const getSegmentTime = () => traffic === 'light' ? 5 : traffic === 'moderate' ? 8 : 12;
-
     const routesData = staticRoutes.map(route => {
       let time = 0;
-      const stops = route.stops.map((stop, i) => {
-        if (!closed && i > 0) time += getSegmentTime();
-        return { name: stop, arrivalTimestamp: closed ? 0 : now + time * 60000 };
+      const stops = route.stops.map((stop, i, arr) => {
+        if (!closed && i > 0) {
+          const from = arr[i - 1];
+          const to = stop;
+          // Use detailed traffic-based ETA only for Route 1
+         time += getTravelTimeInMinutes(from, to, traffic);
+
+        }
+        return {
+          name: stop,
+          arrivalTimestamp: closed ? 0 : now + time * 60000,
+        };
       });
       return { ...route, stops };
     });
@@ -147,7 +305,7 @@ export default function RoutesPage() {
 
               {isClosed && (
                 <div className="bg-red-100 text-red-700 font-medium px-4 py-2 rounded-md text-sm">
-                  🕘 Buses are not operating between 9:00 PM and 5:00 AM
+                  🕘 Buses are not operating between 9:00 PM and it will open at 5:00 AM
                 </div>
               )}
 
@@ -165,13 +323,13 @@ export default function RoutesPage() {
                         className={`text-xs flex items-center gap-2 px-3 py-1 rounded-full font-medium ${
                           isClosed || stop.arrivalTimestamp === 0
                             ? 'bg-gray-200 text-gray-600'
-                            : 'bg-green-100 text-green-700 animate-pulse'
+                            : 'bg-gray-200 text-gray-700'
                         }`}
                       >
                         <Clock className="w-4 h-4" />
                         {isClosed || stop.arrivalTimestamp === 0
                           ? 'Closed'
-                          : `ETA: ${formatTime(stop.arrivalTimestamp)}`}
+                          : ` ${formatTime(stop.arrivalTimestamp)}`}
                       </div>
                     </div>
                   </li>
@@ -179,7 +337,7 @@ export default function RoutesPage() {
               </ol>
 
               <p className="text-xs text-gray-500 text-right">
-                {isClosed ? 'Live tracking resumes at 5:00 AM' : 'Auto-refreshing every 30 seconds'}
+                {isClosed ? 'Live tracking resumes at 5:00 AM' : 'Auto-refreshing every 1 minute'}
               </p>
             </div>
           )}
