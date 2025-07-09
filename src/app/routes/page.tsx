@@ -313,7 +313,7 @@ export default function RoutesPage() {
               <ol className="space-y-5 relative border-l-2 border-blue-200 pl-5">
                 {selectedRoute.stops.map((stop, i) => (
                   <li key={i} className="relative pl-4">
-                    <span className="absolute -left-[11px] top-1.5 w-3 h-3 bg-blue-600 rounded-full shadow-md"></span>
+                    <span className="absolute -left-[11px] top-1.5 w-3 h-3=rounded-full shadow-md"></span>
                     <div className="flex justify-between items-center">
                       <div className="text-gray-900 font-semibold flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-blue-700" />
