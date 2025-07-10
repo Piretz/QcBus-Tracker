@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import { Bus, RefreshCcw, MapPin, Clock } from "lucide-react";
+import { Bus, MapPin, Clock } from "lucide-react";
 
 type Stop = {
   name: string;
@@ -34,71 +34,80 @@ const staticRoutes = [
   }
 ];
 
+const calculateETA = (
+  baseTime: number,
+  distanceKm: number,
+  speedKmh: number,
+  delayPerStop: number,
+  trafficDelay: number
+) => {
+  const travelTimeMin = (distanceKm / speedKmh) * 60;
+  const totalDelayMin = delayPerStop + trafficDelay;
+  return baseTime + (travelTimeMin + totalDelayMin) * 60 * 1000;
+};
+
+const isOutsideOperatingHours = () => {
+  const now = new Date();
+  const hour = now.getHours();
+  return hour < 5 || hour >= 21;
+};
+
 export default function RoutesPage() {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [selectedRouteId, setSelectedRouteId] = useState<number | null>(1);
   const [isClosed, setIsClosed] = useState(false);
   const [currentTime, setCurrentTime] = useState(Date.now());
 
+  const generateRoutes = useCallback(() => {
+    const closed = isOutsideOperatingHours();
+    setIsClosed(closed);
 
-const generateRoutes = () => {
-  const now = Date.now();
+    const now = Date.now();
+    const hour = new Date(now).getHours();
+    const isRushHour = (hour >= 7 && hour <= 10) || (hour >= 17 && hour <= 20);
 
-  const closingTime = new Date();
-  closingTime.setHours(21, 0, 0, 0);
+    const baseSpeed = isRushHour ? 15 : 25;
+    const trafficDelay = isRushHour ? 4 : 2;
+    const stopDelay = 1.5;
 
-  const closed = now >= closingTime.getTime();
-  setIsClosed(closed);
+    const routesData: Route[] = staticRoutes.map((route) => {
+      let cumulativeDistance = 0;
 
-  if (closed) {
-    const offlineRoutes: Route[] = staticRoutes.map(route => ({
-      ...route,
-      stops: route.stops.map(stop => ({
-        name: stop,
-        arrivalTimestamp: 0,
-      }))
-    }));
-    setRoutes(offlineRoutes);
-    return;
-  }
+      return {
+        ...route,
+        stops: route.stops.map((stop) => {
+          const segmentDistance = 2 + Math.random() * 1.5;
+          cumulativeDistance += segmentDistance;
 
-  const intervalPerStop = 3 * 60 * 1000; // 3 minutes in milliseconds
+          const eta = closed
+            ? 0
+            : calculateETA(now, cumulativeDistance, baseSpeed, stopDelay, trafficDelay);
 
-  const liveRoutes: Route[] = staticRoutes.map(route => {
-    return {
-      ...route,
-      stops: route.stops.map((stop, index) => ({
-        name: stop,
-        arrivalTimestamp: now + (index + 1) * intervalPerStop,
-      })),
-    };
-  });
+          return {
+            name: stop,
+            arrivalTimestamp: eta,
+          };
+        }),
+      };
+    });
 
-  setRoutes(liveRoutes);
+    setRoutes(routesData);
 
-  if (selectedRouteId === null && liveRoutes.length > 0) {
-    setSelectedRouteId(liveRoutes[0].id);
-  }
-};
+    if (selectedRouteId === null && routesData.length > 0) {
+      setSelectedRouteId(routesData[0].id);
+    }
+  }, [selectedRouteId]);
 
-  // Initial generation + refresh every 30s
   useEffect(() => {
     generateRoutes();
     const refresh = setInterval(generateRoutes, 30000);
     return () => clearInterval(refresh);
-  }, []);
+  }, [generateRoutes]);
 
-  // Real-time clock & closure check every second
   useEffect(() => {
     const tick = setInterval(() => {
-      const now = Date.now();
-      setCurrentTime(now);
-
-      const closing = new Date();
-      closing.setHours(21, 0, 0, 0);
-
-      const closed = now >= closing.getTime();
-      setIsClosed(closed);
+      setCurrentTime(Date.now());
+      setIsClosed(isOutsideOperatingHours());
     }, 1000);
     return () => clearInterval(tick);
   }, []);
@@ -117,32 +126,36 @@ const generateRoutes = () => {
 
   const formatTimeDiff = (timestamp: number): string => {
     const diffMs = timestamp - currentTime;
-    const minutes = Math.max(0, Math.floor(diffMs / 60000));
-    return `${minutes} min${minutes !== 1 ? 's' : ''}`;
+    if (diffMs <= 0) return "Arrived";
+    const minutes = Math.floor(diffMs / 60000);
+    const seconds = Math.floor((diffMs % 60000) / 1000);
+    return `${minutes}m ${seconds < 10 ? '0' : ''}${seconds}s`;
   };
 
   return (
     <>
       <Navbar />
-      <main className="min-h-[85vh] bg-gradient-to-br from-blue-100 to-white px-4 py-12">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl font-extrabold text-blue-800 mb-2 flex items-center justify-center gap-2">
-            <Bus className="w-8 h-8 text-blue-600" /> Libreng Sakay Tracker
+      <main className="min-h-[85vh] bg-gradient-to-br from-blue-100 via-white to-blue-50 px-4 py-12">
+        <div className="max-w-4xl mx-auto text-center space-y-8">
+          <h1 className="text-4xl font-extrabold text-blue-800 flex justify-center items-center gap-2">
+            <Bus className="w-8 h-8 text-blue-600" />
+            Libreng Sakay Tracker
           </h1>
-          <p className="text-gray-700 mb-8 text-base md:text-lg max-w-xl mx-auto">
-            View your bus route below and track when it arrives — updated in real-time every 30 seconds.
+          <p className="text-gray-700 text-base md:text-lg max-w-xl mx-auto">
+            View your bus route and get real-time arrival updates — refreshed every 30 seconds.
           </p>
 
-          {/* Route Selector */}
-          <div className="mb-8 text-left">
-            <label className="block mb-2 text-sm font-medium text-gray-800">Choose your route:</label>
+          <div className="text-left w-full">
+            <label className="block text-sm font-medium text-gray-800 mb-2">
+              🧭 Choose your route:
+            </label>
             <select
               disabled={routes.length === 0}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 text-sm rounded-xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900 bg-white"
               value={selectedRouteId ?? ''}
               onChange={(e) => setSelectedRouteId(Number(e.target.value))}
             >
-              {routes.map((route) => (
+              {routes.map(route => (
                 <option key={route.id} value={route.id}>
                   {route.name}
                 </option>
@@ -150,89 +163,53 @@ const generateRoutes = () => {
             </select>
           </div>
 
-          {/* Refresh Button */}
-    <div className="flex justify-end mb-6">
-  <button
-    onClick={generateRoutes}
-    disabled={isClosed}
-    className={`group relative inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300 ring-offset-2 shadow-xl ${
-      isClosed
-        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-        : 'bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white hover:from-blue-600 hover:to-blue-800 active:scale-[0.97]'
-    } backdrop-blur-md`}
-    style={{
-      boxShadow: isClosed
-        ? 'none'
-        : '0 4px 14px rgba(59, 130, 246, 0.4), 0 2px 4px rgba(0,0,0,0.1)',
-    }}
-  >
-    {/* Spinning Icon on Hover */}
-    <RefreshCcw
-      className={`w-5 h-5 transition-transform duration-500 ${
-        isClosed ? 'text-gray-500' : 'group-hover:rotate-[360deg]'
-      }`}
-    />
-    <span className="relative z-10">Refresh Now</span>
-
-    {/* Glow ring on hover */}
-    {!isClosed && (
-      <span className="absolute inset-0 rounded-2xl ring-1 ring-white/10 group-hover:ring-white/20 transition-all duration-300 pointer-events-none" />
-    )}
-  </button>
-</div>
-
-
-
-          {/* Route Display */}
           {selectedRoute && (
-  <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-xl text-left transition-all duration-300">
-    <h2 className="text-2xl font-bold text-blue-700 mb-2 flex items-center gap-2">
-      🛣️ {selectedRoute.name}
-    </h2>
+            <div className="bg-white shadow-xl border border-gray-200 rounded-2xl p-6 w-full text-left transition-all duration-300">
+              <h2 className="text-2xl font-bold text-blue-900 flex items-center gap-2 mb-4">
+                🛣️ {selectedRoute.name}
+              </h2>
 
-    {/* Closed notice */}
-    {isClosed && (
-      <div className="text-sm text-red-600 font-semibold mb-4">
-        🕘 Bus operations have ended for today. Live tracking is offline.
-      </div>
-    )}
+              {isClosed && (
+                <div className="bg-red-100 text-red-700 font-semibold px-4 py-2 rounded-md mb-4 text-sm">
+                  🕘 Bus operations are closed between 9:00 PM and 5:00 AM. Real-time tracking is unavailable.
+                </div>
+              )}
 
-    {/* Stops */}
-    <ol className="space-y-4">
-      {selectedRoute.stops.map((stop, index) => (
-        <li
-          key={index}
-          className="bg-blue-50 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between shadow-sm border border-blue-100 hover:shadow-md transition"
-        >
-          <div className="flex items-center gap-3 mb-2 sm:mb-0">
-            <MapPin className="w-5 h-5 text-blue-500" />
-            <span className="text-gray-900 font-medium text-base">{stop.name}</span>
-          </div>
+              <ol className="space-y-4">
+                {selectedRoute.stops.map((stop, index) => (
+                  <li
+                    key={index}
+                    className="bg-blue-50 border border-blue-200 hover:shadow-md transition rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="flex items-center gap-3 mb-2 sm:mb-0">
+                      <MapPin className="w-5 h-5 text-blue-700" />
+                      <span className="text-base font-semibold text-gray-900">{stop.name}</span>
+                    </div>
+                    <div className="sm:text-right">
+                      <div className="flex items-center justify-end gap-1 text-green-700 font-semibold text-sm">
+                        <Clock className="w-4 h-4 text-green-700" />
+                        <span>
+                          {isClosed || stop.arrivalTimestamp === 0
+                            ? 'Closed'
+                            : formatTimeDiff(stop.arrivalTimestamp)}
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-700">
+                        {isClosed || stop.arrivalTimestamp === 0
+                          ? 'No trips available'
+                          : `ETA: ${formatArrivalTime(stop.arrivalTimestamp)}`}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ol>
 
-          {/* Time Display for Each Stop */}
-          <div className="text-right text-sm sm:text-base text-green-700 space-y-0 sm:space-y-0 sm:flex sm:flex-col sm:items-end font-semibold">
-            <div className="flex items-center gap-1">
-              <Clock className="w-4 h-4 text-green-600" />
-              <span>
-                {isClosed || stop.arrivalTimestamp === 0
-                  ? 'Closed'
-                  : formatTimeDiff(stop.arrivalTimestamp)}
-              </span>
+              <p className="text-xs text-gray-500 mt-6 text-right">
+                {isClosed
+                  ? 'Live tracking resumes at 5:00 AM'
+                  : 'Auto-refreshing every 30 seconds'}
+              </p>
             </div>
-            <div className="text-xs text-gray-600">
-              {isClosed || stop.arrivalTimestamp === 0
-                ? 'No trips after 9 PM'
-                : `Arrives at ${formatArrivalTime(stop.arrivalTimestamp)}`}
-            </div>
-          </div>
-        </li>
-      ))}
-    </ol>
-
-    <p className="text-xs text-gray-400 mt-6 text-right">
-      {isClosed ? 'Live tracking unavailable after 9 PM' : 'Auto-refreshes every 30 seconds'}
-    </p>
-  </div>
           )}
         </div>
       </main>

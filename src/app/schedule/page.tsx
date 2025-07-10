@@ -46,29 +46,31 @@ export default function SchedulePage() {
     <>
       <Navbar />
       <main className="min-h-[85vh] bg-gradient-to-br from-blue-100 via-white to-blue-50 px-4 py-12">
-        <div className="max-w-6xl mx-auto text-center space-y-8">
+        <div className="max-w-6xl mx-auto text-center space-y-10">
           <div>
             <h1 className="text-4xl font-extrabold text-blue-800 flex items-center justify-center gap-2">
               🕒 Libreng Sakay Bus Schedules
             </h1>
-            <p className="text-gray-700 text-sm md:text-base mt-2 max-w-xl mx-auto">
-              Check real-time operating hours for each route. Today’s schedule is{' '}
-              <span className="font-semibold text-blue-700">highlighted</span>.
+            <p className="text-gray-700 text-sm md:text-base mt-3 max-w-xl mx-auto">
+              View operating hours for each route. <br />
+              <span className="inline-flex items-center gap-1 text-blue-700 font-medium mt-1">
+                <span className="h-2 w-2 rounded-full bg-yellow-400 animate-pulse" />
+                Today’s schedule is highlighted.
+              </span>
             </p>
           </div>
 
-          {/* Schedule Table */}
-          <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-xl">
-            <table className="min-w-full text-sm md:text-base bg-white table-fixed">
-              <thead className="bg-blue-700 text-white sticky top-0 z-30">
+          <div className="overflow-auto rounded-2xl border border-gray-300 shadow-xl backdrop-blur bg-white/80">
+            <table className="min-w-full text-sm md:text-base table-fixed">
+              <thead className="bg-blue-800 text-white sticky top-0 z-30">
                 <tr>
-                  <th className="py-4 px-5 text-left font-semibold whitespace-nowrap w-64 sticky left-0 z-40 bg-blue-700">
+                  <th className="py-4 px-6 text-left font-semibold sticky left-0 z-40 bg-blue-800 w-64">
                     🛣️ Route
                   </th>
                   {days.map((day) => (
                     <th
                       key={day}
-                      className={`py-4 px-3 capitalize font-medium text-center ${
+                      className={`py-4 px-3 capitalize text-center font-medium ${
                         currentDay === day ? 'bg-blue-900 text-yellow-300' : ''
                       }`}
                     >
@@ -83,14 +85,16 @@ export default function SchedulePage() {
                     key={index}
                     className="border-t border-gray-200 hover:bg-blue-50 transition duration-150"
                   >
-                    <td className="py-3 px-5 text-left font-semibold text-gray-800 sticky left-0 bg-white z-20 border-r border-gray-200">
+                    <td className="py-4 px-6 text-left font-semibold text-gray-800 sticky left-0 bg-white z-20 border-r border-gray-200">
                       {schedule.route}
                     </td>
                     {days.map((day) => (
                       <td
                         key={day}
-                        className={`py-3 px-3 text-center text-gray-700 ${
-                          currentDay === day ? 'bg-blue-50 font-semibold text-blue-800' : ''
+                        className={`py-3 px-3 text-center ${
+                          currentDay === day
+                            ? 'bg-blue-50 font-semibold text-blue-800'
+                            : 'text-gray-700'
                         }`}
                       >
                         {schedule[day as keyof typeof schedule]}
@@ -102,7 +106,6 @@ export default function SchedulePage() {
             </table>
           </div>
 
-          {/* Timestamp */}
           <p className="text-sm text-gray-500 italic">
             📅 Last checked:{' '}
             <span className="text-gray-700 font-medium">

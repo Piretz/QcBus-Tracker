@@ -32,60 +32,49 @@ export default function Navbar() {
         allowOutsideClick: false,
       }).then((result) => {
         localStorage.setItem('locationRequested', 'true');
-        if (result.isConfirmed) {
-          if ('geolocation' in navigator) {
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                console.log('User location:', position.coords);
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Location Access Granted',
-                  timer: 2000,
-                  showConfirmButton: false,
-                });
-              },
-              () => {
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Location Access Denied',
-                  text: 'Please enable location in your browser settings.',
-                });
-              }
-            );
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Not Supported',
-              text: 'Geolocation is not supported by your browser.',
-            });
-          }
+        if (result.isConfirmed && 'geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              console.log('User location:', position.coords);
+              Swal.fire({
+                icon: 'success',
+                title: 'Location Access Granted',
+                timer: 2000,
+                showConfirmButton: false,
+              });
+            },
+            () => {
+              Swal.fire({
+                icon: 'error',
+                title: 'Location Access Denied',
+                text: 'Please enable location in your browser settings.',
+              });
+            }
+          );
         }
       });
     }
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 bg-blue-700 text-white shadow-lg">
+    <nav className="sticky top-0 z-50 bg-blue-700/80 backdrop-blur-md shadow-md text-white transition">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
         {/* Logo */}
-        <Link
-          href="/"
-          className="text-2xl font-bold tracking-tight flex items-center space-x-2 hover:scale-105 transition-transform"
-        >
+        <Link href="/" className="text-2xl font-bold flex items-center space-x-2 hover:opacity-90 transition">
           <span>🚍</span>
-          <span className="font-extrabold">Libreng Sakay QC</span>
+          <span className="font-extrabold tracking-tight">Libreng Sakay QC</span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex space-x-6 items-center">
+        {/* Desktop Nav */}
+        <div className="hidden md:flex space-x-4 items-center">
           {navLinks.map((link) => (
             <Link
               key={link.path}
               href={link.path}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+              className={`px-4 py-2 text-sm font-medium rounded-md transition ${
                 pathname === link.path
-                  ? 'bg-white text-blue-700 shadow-md'
-                  : 'hover:bg-blue-600 hover:text-white text-white/90'
+                  ? 'bg-white text-blue-700 shadow'
+                  : 'hover:bg-white/20 hover:text-white'
               }`}
             >
               {link.name}
@@ -93,20 +82,16 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Mobile Toggle Button */}
-        <button
-          className="md:hidden text-white focus:outline-none focus:ring-2 focus:ring-white rounded-md"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
-        >
+        {/* Mobile Toggle */}
+        <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden">
           {menuOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
 
       {/* Mobile Menu */}
       <div
-        className={`md:hidden bg-blue-700 overflow-hidden transition-all duration-500 ease-in-out ${
-          menuOpen ? 'max-h-[400px] py-4 px-4' : 'max-h-0 py-0 px-4'
+        className={`md:hidden bg-blue-700 transition-all duration-300 overflow-hidden ${
+          menuOpen ? 'max-h-[400px] py-4 px-6' : 'max-h-0 py-0 px-6'
         }`}
       >
         <div className="flex flex-col space-y-3">
@@ -115,10 +100,10 @@ export default function Navbar() {
               key={link.path}
               href={link.path}
               onClick={() => setMenuOpen(false)}
-              className={`block px-4 py-2 text-sm rounded-lg font-medium transition-all ${
+              className={`block px-4 py-2 rounded-lg text-sm font-medium transition ${
                 pathname === link.path
-                  ? 'bg-white text-blue-700 shadow-sm'
-                  : 'text-white hover:bg-blue-500'
+                  ? 'bg-white text-blue-700 shadow'
+                  : 'text-white hover:bg-blue-600'
               }`}
             >
               {link.name}

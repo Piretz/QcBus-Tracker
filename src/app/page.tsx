@@ -1,4 +1,4 @@
-'use client'; 
+'use client';
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
 import Link from "next/link";
@@ -20,7 +20,7 @@ export default function HomePage() {
               Real-time tracking, live schedules, and free rides across Quezon City.
             </p>
             <Link href="/register">
-              <button className="bg-yellow-400 text-black font-semibold px-6 py-3 rounded-lg hover:bg-yellow-300 transition-all transform hover:scale-105 shadow-lg">
+              <button className="bg-yellow-400 text-black font-semibold px-8 py-3 rounded-full hover:bg-yellow-300 transition-all transform hover:scale-105 shadow-xl">
                 🗺️ Get Started
               </button>
             </Link>
@@ -29,7 +29,7 @@ export default function HomePage() {
 
         {/* Features Section */}
         <section className="py-24 px-6 bg-gradient-to-b from-blue-50 to-white text-center text-gray-800">
-          <h2 className="text-4xl md:text-5xl font-bold text-blue-800 mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-blue-800 mb-16 animate-fade-in-down">
             Why Use Libreng Sakay QC?
           </h2>
           <div className="grid gap-12 md:grid-cols-3 max-w-6xl mx-auto">
@@ -52,7 +52,7 @@ export default function HomePage() {
             ].map((feature, index) => (
               <div
                 key={index}
-                className="bg-white/90 border border-gray-100 rounded-3xl p-8 shadow-md hover:shadow-xl transition duration-300 text-left hover:bg-white"
+                className="bg-white/90 border border-gray-100 rounded-3xl p-8 shadow-md hover:shadow-2xl transition-all duration-300 text-left hover:bg-white transform hover:-translate-y-1"
               >
                 <div className="text-5xl mb-4">{feature.icon}</div>
                 <h3 className="text-xl font-bold text-blue-700 mb-2">{feature.title}</h3>
@@ -64,7 +64,7 @@ export default function HomePage() {
 
         {/* Route Highlights Section */}
         <section className="py-24 px-6 bg-white text-gray-800 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-blue-800 mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-blue-800 mb-16 animate-fade-in-down">
             QC Route Highlights
           </h2>
           <div className="grid gap-10 md:grid-cols-3 max-w-6xl mx-auto">
@@ -87,7 +87,7 @@ export default function HomePage() {
             ].map((route, index) => (
               <div
                 key={index}
-                className="bg-blue-50 border border-blue-100 rounded-3xl p-8 shadow-sm hover:shadow-lg transition duration-300 text-left hover:bg-blue-100/50"
+                className="bg-blue-50 border border-blue-100 rounded-3xl p-8 shadow-md hover:shadow-xl transition-all duration-300 text-left hover:bg-blue-100/60 transform hover:-translate-y-1"
               >
                 <div className="text-4xl mb-4">{route.icon}</div>
                 <h3 className="text-xl font-bold text-blue-700 mb-2">{route.name}</h3>
@@ -106,12 +106,12 @@ export default function HomePage() {
         <section className="bg-blue-700 text-white py-20 px-6 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-10 pointer-events-none bg-cover" />
           <div className="relative z-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Ride?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 animate-fade-in-up">Ready to Ride?</h2>
             <p className="mb-6 text-lg max-w-xl mx-auto">
               Discover routes, check updated schedules, and track your bus — all in one place.
             </p>
             <Link href="/map">
-              <button className="bg-yellow-400 text-black font-semibold px-6 py-3 rounded-lg hover:bg-yellow-300 transition-all transform hover:scale-105 shadow-lg">
+              <button className="bg-yellow-400 text-black font-semibold px-8 py-3 rounded-full hover:bg-yellow-300 transition-all transform hover:scale-105 shadow-xl">
                 🧭 View Live Map
               </button>
             </Link>
