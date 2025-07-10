@@ -24,7 +24,6 @@ interface Bus {
   route: string;
 }
 
-// Simulated live API fetch
 const fetchBusLocations = (): Promise<Bus[]> =>
   new Promise((resolve) => {
     setTimeout(() => {
@@ -36,8 +35,6 @@ const fetchBusLocations = (): Promise<Bus[]> =>
     }, 1000);
   });
 
-
-
 function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const toRad = (val: number) => (val * Math.PI) / 180;
   const R = 6371;
@@ -48,16 +45,34 @@ function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: num
   return R * c;
 }
 
-// Simulated destination (you can allow users to set this later)
 const destination: Location = {
   lat: 14.6548,
   lng: 121.0647,
 };
 
+function getTrafficCondition(): 'light' | 'moderate' | 'heavy' {
+  const hour = new Date().getHours();
+  if ((hour >= 7 && hour <= 10) || (hour >= 17 && hour <= 20)) return 'heavy';
+  if ((hour >= 6 && hour < 7) || (hour > 10 && hour <= 16)) return 'moderate';
+  return 'light';
+}
+
+function triggerFeedback() {
+  if ('vibrate' in navigator) {
+    navigator.vibrate(300);
+  }
+
+  const audio = new Audio('/notification.mp3');
+  audio.play().catch((err) => {
+    console.log('Sound play error:', err);
+  });
+}
+
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [userLocation, setUserLocation] = useState<Location | null>(null);
   const [notifiedBusIds, setNotifiedBusIds] = useState<Set<number>>(new Set());
+  const [lastTraffic, setLastTraffic] = useState<string | null>(null);
 
   useEffect(() => {
     if ('geolocation' in navigator) {
@@ -75,29 +90,60 @@ export default function NotificationsPage() {
     if (!userLocation) return;
 
     const interval = setInterval(async () => {
+      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const currentTraffic = getTrafficCondition();
+      if (currentTraffic !== lastTraffic) {
+        setNotifications((prev) => [
+          {
+            id: Date.now(),
+            message: `🚦 Traffic update: ${currentTraffic.toUpperCase()} traffic conditions.`,
+            type: 'alert',
+            time: now,
+          },
+          ...prev,
+        ]);
+        setLastTraffic(currentTraffic);
+      }
+
       const buses = await fetchBusLocations();
       const newNotified = new Set(notifiedBusIds);
 
       buses.forEach((bus) => {
         const userDistance = calculateDistanceKm(userLocation.lat, userLocation.lng, bus.lat, bus.lng);
         const destDistance = calculateDistanceKm(destination.lat, destination.lng, bus.lat, bus.lng);
-        const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-        // Near current location
-        if (userDistance <= 1.0 && !notifiedBusIds.has(bus.id)) {
+        // 🟡 Bus is on the way (between 0.8 and 2km)
+        if (userDistance > 0.8 && userDistance <= 2 && !notifiedBusIds.has(bus.id + 2000)) {
           setNotifications((prev) => [
             {
               id: Date.now(),
-              message: `🚌 Bus #${bus.id} is near your current location!\n🗺️ ${bus.route}`,
+              message: `🚌 Bus #${bus.id} is on the way to your location!\n🗺️ ${bus.route}`,
+              type: 'bus',
+              time: now,
+            },
+            ...prev,
+          ]);
+          newNotified.add(bus.id + 2000);
+          triggerFeedback();
+        }
+
+        // 🔵 Bus is very near
+        if (userDistance <= 0.8 && !notifiedBusIds.has(bus.id)) {
+          setNotifications((prev) => [
+            {
+              id: Date.now(),
+              message: `📍 Bus #${bus.id} is near your current location!\n🗺️ ${bus.route}`,
               type: 'bus',
               time: now,
             },
             ...prev,
           ]);
           newNotified.add(bus.id);
+          triggerFeedback();
         }
 
-        // Near destination
+        // 🏁 Approaching destination
         if (destDistance <= 0.8 && !notifiedBusIds.has(bus.id + 1000)) {
           setNotifications((prev) => [
             {
@@ -109,6 +155,7 @@ export default function NotificationsPage() {
             ...prev,
           ]);
           newNotified.add(bus.id + 1000);
+          triggerFeedback();
         }
       });
 
@@ -116,9 +163,7 @@ export default function NotificationsPage() {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [userLocation, notifiedBusIds]);
-
-  
+  }, [userLocation, notifiedBusIds, lastTraffic]);
 
   return (
     <>

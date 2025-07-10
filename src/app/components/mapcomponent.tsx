@@ -183,54 +183,7 @@ export default function MapComponent() {
         </MapContainer>
       </div>
 
-      <style jsx global>{`
-        @keyframes pulse {
-          0% {
-            transform: scale(1);
-            box-shadow: 0 0 10px rgba(0, 123, 255, 0.7);
-          }
-          50% {
-            transform: scale(1.2);
-            box-shadow: 0 0 20px rgba(0, 123, 255, 0.9);
-          }
-          100% {
-            transform: scale(1);
-            box-shadow: 0 0 10px rgba(0, 123, 255, 0.7);
-          }
-        }
-
-        .user-location-marker {
-          width: 20px;
-          height: 20px;
-          background: #007bff;
-          border-radius: 50%;
-          border: 3px solid white;
-          animation: pulse 1.5s infinite;
-        }
-
-        @keyframes bounce {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-5px);
-          }
-        }
-
-        .bus-marker {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          padding: 4px 8px;
-          background: #34d399;
-          border-radius: 12px;
-          color: white;
-          font-weight: bold;
-          font-size: 12px;
-          box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
-          animation: bounce 1.5s infinite;
-        }
-      `}</style>
+     
     </>
   );
 }
