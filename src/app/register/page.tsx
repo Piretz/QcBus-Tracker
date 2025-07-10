@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import * as yup from "yup";
 
-// ✅ Validation Schema using Yup
+// ✅ Yup Validation Schema
 const validationSchema = yup.object().shape({
   name: yup.string().min(3, "Full Name must be at least 3 characters").required("Full Name is required"),
   email: yup.string().email("Invalid email address").required("Email is required"),
@@ -31,58 +31,58 @@ export default function RegisterPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    // ✅ Validate inputs
-    await validationSchema.validate(form, { abortEarly: false });
+    try {
+      // ✅ Validate form
+      await validationSchema.validate(form, { abortEarly: false });
 
-  const res = await fetch('https://bus-tracker-be.onrender.com/api/auth/register', {
-
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Registered Successfully!',
-        text: 'A confirmation email has been sent. Please verify to continue.',
-        timer: 3500,
-        showConfirmButton: false,
-        timerProgressBar: true,
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
       });
-      setTimeout(() => router.push('/login'), 4000);
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Registration Failed',
-        text: data.msg || 'Please try again.',
-      });
+
+      const data = await res.json();
+      console.log("Register response:", res.status, data); // ✅ Debug
+
+      if (res.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Registered Successfully!',
+          text: 'You will be redirected shortly.',
+          timer: 3500,
+          showConfirmButton: false,
+          timerProgressBar: true,
+        });
+        setTimeout(() => router.push('/login'), 4000);
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Registration Failed',
+          text: data.msg || 'Please try again.',
+        });
+      }
+    } catch (err) {
+      if (err instanceof yup.ValidationError) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Validation Error',
+          html: err.errors.join('<br>'),
+        });
+      } else {
+        console.error("Registration error:", err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Network Error',
+          text: 'Something went wrong. Please try again.',
+        });
+      }
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    if (err instanceof yup.ValidationError) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Validation Error',
-        html: err.errors.join('<br>'),
-      });
-    } else {
-      console.error(err);
-      Swal.fire({
-        icon: 'error',
-        title: 'Network Error',
-        text: 'Something went wrong. Please try again.',
-      });
-    }
-  } finally {
-    setLoading(false);
-  }
   };
 
   return (
