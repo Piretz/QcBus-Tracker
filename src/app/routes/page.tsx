@@ -19,20 +19,74 @@ type Route = {
 const staticRoutes = [
   {
     id: 1,
-    name: 'QC Hall to Cubao',
-    stops: ['QC Hall', 'EDSA-Kamuning', 'Cubao Terminal']
+    name: 'QMC to Welcome Rotonda via E. Rodriguez Sr. Avenue',
+    stops: [
+      'Quezon Memorial Circle',
+      'Kalayaan Avenue',
+      'Tomas Morato',
+      'St. Luke’s Medical Center',
+      'Trinity University of Asia',
+      'Welcome Rotonda',
+    ],
   },
   {
     id: 2,
-    name: 'QC Hall to Litex/IBP',
-    stops: ['QC Hall', 'Commonwealth', 'Litex', 'IBP Road']
+    name: 'QMC to Katipunan via CP Garcia',
+    stops: [
+      'Quezon Memorial Circle',
+      'University Avenue (UP Diliman)',
+      'CP Garcia Avenue',
+      'UP Town Center',
+      'Katipunan (LRT2 Station)',
+    ],
   },
   {
     id: 3,
-    name: 'Welcome Rotonda to Katipunan',
-    stops: ['Welcome Rotonda', 'España', 'Aurora Blvd', 'Katipunan']
-  }
+    name: 'QMC to Araneta-Cubao via East Avenue',
+    stops: [
+      'Quezon Memorial Circle',
+      'Philippine Heart Center',
+      'East Avenue Medical Center',
+      'Land Transportation Office (LTO)',
+      'National Kidney Institute',
+      'Araneta City / Cubao',
+    ],
+  },
+  {
+    id: 4,
+    name: 'IBP Road to Litex',
+    stops: [
+      'Batasan Road (near Sandiganbayan)',
+      'IBP Road',
+      'Commonwealth Avenue',
+      'Litex Market',
+      'Payatas Road Junction',
+    ],
+  },
+  {
+    id: 5,
+    name: 'Novaliches to QMC via Mindanao Avenue',
+    stops: [
+      'Novaliches Bayan (Proper)',
+      'Tandang Sora Avenue',
+      'Mindanao Avenue',
+      'Visayas Avenue',
+      'Quezon Memorial Circle',
+    ],
+  },
+  {
+    id: 6,
+    name: 'QMC – Philcoa – UP – Katipunan Loop',
+    stops: [
+      'Quezon Memorial Circle',
+      'Philcoa',
+      'University of the Philippines (UP) Campus',
+      'Katipunan Avenue',
+      'Balara Area',
+    ],
+  },
 ];
+
 
 const calculateETA = (
   baseTime: number,
@@ -58,45 +112,136 @@ export default function RoutesPage() {
   const [isClosed, setIsClosed] = useState(false);
   const [currentTime, setCurrentTime] = useState(Date.now());
 
-  const generateRoutes = useCallback(() => {
-    const closed = isOutsideOperatingHours();
-    setIsClosed(closed);
+ const generateRoutes = useCallback(() => {
+  const closed = isOutsideOperatingHours();
+  setIsClosed(closed);
 
-    const now = Date.now();
-    const hour = new Date(now).getHours();
-    const isRushHour = (hour >= 7 && hour <= 10) || (hour >= 17 && hour <= 20);
+  const now = Date.now();
+  const hour = new Date(now).getHours();
 
-    const baseSpeed = isRushHour ? 15 : 25;
-    const trafficDelay = isRushHour ? 4 : 2;
-    const stopDelay = 1.5;
+  const getTrafficCondition = () => {
+    if ((hour >= 7 && hour <= 10) || (hour >= 17 && hour <= 20)) return 'heavy';
+    if ((hour >= 6 && hour < 7) || (hour > 10 && hour <= 16)) return 'moderate';
+    return 'light';
+  };
 
-    const routesData: Route[] = staticRoutes.map((route) => {
-      let cumulativeDistance = 0;
+  const trafficCondition = getTrafficCondition();
+
+ const getSegmentTime = (from: string, to: string, routeId: number): number => {
+  // Route 1: QMC → Welcome Rotonda
+  if (routeId === 1) {
+    if (from === 'Quezon Memorial Circle' && to === 'Kalayaan Avenue')
+      return trafficCondition === 'light' ? 12 : trafficCondition === 'moderate' ? 20 : 32;
+    if (from === 'Kalayaan Avenue' && to === 'Tomas Morato')
+      return trafficCondition === 'light' ? 15 : trafficCondition === 'moderate' ? 24 : 38;
+    if (from === 'Tomas Morato' && to === 'St. Luke’s Medical Center')
+      return trafficCondition === 'light' ? 7 : trafficCondition === 'moderate' ? 12 : 20;
+    if (from === 'St. Luke’s Medical Center' && to === 'Trinity University of Asia')
+      return trafficCondition === 'light' ? 3 : trafficCondition === 'moderate' ? 4 : 5;
+    if (from === 'Trinity University of Asia' && to === 'Welcome Rotonda')
+      return trafficCondition === 'light' ? 12 : trafficCondition === 'moderate' ? 20 : 30;
+  }
+
+  // Route 2: QMC → Katipunan via CP Garcia
+  if (routeId === 2) {
+    if (from === 'Quezon Memorial Circle' && to === 'University Avenue (UP Diliman)')
+      return trafficCondition === 'light' ? 4 : trafficCondition === 'moderate' ? 8 : 13;
+    if (from === 'University Avenue (UP Diliman)' && to === 'CP Garcia Avenue')
+      return trafficCondition === 'light' ? 4 : trafficCondition === 'moderate' ? 6 : 9;
+    if (from === 'CP Garcia Avenue' && to === 'UP Town Center')
+      return trafficCondition === 'light' ? 6 : trafficCondition === 'moderate' ? 10 : 16;
+    if (from === 'UP Town Center' && to === 'Katipunan (LRT2 Station)')
+      return trafficCondition === 'light' ? 7 : trafficCondition === 'moderate' ? 12 : 20;
+  }
+
+  // Route 3: QMC → Araneta-Cubao via East Avenue
+  if (routeId === 3) {
+    if (from === 'Quezon Memorial Circle' && to === 'Philippine Heart Center')
+      return trafficCondition === 'light' ? 4 : trafficCondition === 'moderate' ? 8 : 13;
+    if (from === 'Philippine Heart Center' && to === 'East Avenue Medical Center')
+      return 4;
+    if (from === 'East Avenue Medical Center' && to === 'Land Transportation Office (LTO)')
+      return 3;
+    if (from === 'Land Transportation Office (LTO)' && to === 'National Kidney Institute')
+      return 4;
+    if (from === 'National Kidney Institute' && to === 'Araneta City / Cubao')
+      return trafficCondition === 'light' ? 12 : trafficCondition === 'moderate' ? 20 : 32;
+  }
+
+  // Route 4: IBP Road to Litex
+  if (routeId === 4) {
+    if (from === 'Batasan Road (near Sandiganbayan)' && to === 'IBP Road')
+      return trafficCondition === 'light' ? 4 : trafficCondition === 'moderate' ? 8 : 15;
+    if (from === 'IBP Road' && to === 'Commonwealth Avenue')
+      return trafficCondition === 'light' ? 4 : trafficCondition === 'moderate' ? 8 : 15;
+    if (from === 'Commonwealth Avenue' && to === 'Litex Market')
+      return trafficCondition === 'light' ? 6 : trafficCondition === 'moderate' ? 12 : 20;
+    if (from === 'Litex Market' && to === 'Payatas Road Junction')
+      return trafficCondition === 'light' ? 3 : trafficCondition === 'moderate' ? 6 : 10;
+  }
+
+  // Route 5: Novaliches to QMC via Mindanao
+  if (routeId === 5) {
+    if (from === 'Novaliches Bayan (Proper)' && to === 'Tandang Sora Avenue')
+      return trafficCondition === 'light' ? 15 : trafficCondition === 'moderate' ? 24 : 38;
+    if (from === 'Tandang Sora Avenue' && to === 'Mindanao Avenue')
+      return trafficCondition === 'light' ? 6 : trafficCondition === 'moderate' ? 12 : 20;
+    if (from === 'Mindanao Avenue' && to === 'Visayas Avenue')
+      return trafficCondition === 'light' ? 6 : trafficCondition === 'moderate' ? 12 : 20;
+    if (from === 'Visayas Avenue' && to === 'Quezon Memorial Circle')
+      return trafficCondition === 'light' ? 8 : trafficCondition === 'moderate' ? 12 : 20;
+  }
+
+  // Route 6: QMC – Philcoa – UP – Katipunan Loop
+  if (routeId === 6) {
+    if (from === 'Quezon Memorial Circle' && to === 'Philcoa')
+      return trafficCondition === 'light' ? 4 : trafficCondition === 'moderate' ? 6 : 10;
+    if (from === 'Philcoa' && to === 'University of the Philippines (UP) Campus)')
+      return trafficCondition === 'light' ? 4 : trafficCondition === 'moderate' ? 8 : 13;
+    if (from === 'University of the Philippines (UP) Campus)' && to === 'Katipunan Avenue')
+      return trafficCondition === 'light' ? 6 : trafficCondition === 'moderate' ? 12 : 20;
+    if (from === 'Katipunan Avenue' && to === 'Balara Area')
+      return trafficCondition === 'light' ? 5 : trafficCondition === 'moderate' ? 10 : 16;
+  }
+
+  // Default fallback for unlisted segments
+  return trafficCondition === 'light' ? 5 : trafficCondition === 'moderate' ? 8 : 12;
+};
+
+  const routesData: Route[] = staticRoutes.map((route) => {
+    let accumulatedTime = 0;
+
+    const stopsWithETA = route.stops.map((stop, index, allStops) => {
+      let eta = 0;
+
+      if (!closed && index > 0) {
+        const prevStop = allStops[index - 1];
+        const segmentMinutes = getSegmentTime(prevStop, stop, route.id);
+
+
+        accumulatedTime += segmentMinutes;
+        eta = now + accumulatedTime * 60 * 1000;
+      }
 
       return {
-        ...route,
-        stops: route.stops.map((stop) => {
-          const segmentDistance = 2 + Math.random() * 1.5;
-          cumulativeDistance += segmentDistance;
-
-          const eta = closed
-            ? 0
-            : calculateETA(now, cumulativeDistance, baseSpeed, stopDelay, trafficDelay);
-
-          return {
-            name: stop,
-            arrivalTimestamp: eta,
-          };
-        }),
+        name: stop,
+        arrivalTimestamp: eta,
       };
     });
 
-    setRoutes(routesData);
+    return {
+      ...route,
+      stops: stopsWithETA,
+    };
+  });
 
-    if (selectedRouteId === null && routesData.length > 0) {
-      setSelectedRouteId(routesData[0].id);
-    }
-  }, [selectedRouteId]);
+  setRoutes(routesData);
+
+  if (selectedRouteId === null && routesData.length > 0) {
+    setSelectedRouteId(routesData[0].id);
+  }
+}, [selectedRouteId]);
+
 
   useEffect(() => {
     generateRoutes();
@@ -185,21 +330,28 @@ export default function RoutesPage() {
                       <MapPin className="w-5 h-5 text-blue-700" />
                       <span className="text-base font-semibold text-gray-900">{stop.name}</span>
                     </div>
-                    <div className="sm:text-right">
-                      <div className="flex items-center justify-end gap-1 text-green-700 font-semibold text-sm">
-                        <Clock className="w-4 h-4 text-green-700" />
-                        <span>
-                          {isClosed || stop.arrivalTimestamp === 0
-                            ? 'Closed'
-                            : formatTimeDiff(stop.arrivalTimestamp)}
-                        </span>
-                      </div>
-                      <div className="text-xs text-gray-700">
-                        {isClosed || stop.arrivalTimestamp === 0
-                          ? 'No trips available'
-                          : `ETA: ${formatArrivalTime(stop.arrivalTimestamp)}`}
-                      </div>
-                    </div>
+                          <div className="sm:text-right">
+                            <div
+                              className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold transition-all
+                                ${
+                                  isClosed || stop.arrivalTimestamp === 0
+                                    ? 'bg-gray-200 text-gray-600'
+                                    : currentTime >= stop.arrivalTimestamp
+                                    ? 'bg-red-100 text-red-700'
+                                    : 'bg-green-100 text-green-700 animate-pulse'
+                                }
+                              `}
+                            >
+                              <Clock className="w-4 h-4" />
+                              <span>
+                                {isClosed || stop.arrivalTimestamp === 0
+                                  ? 'Closed'
+                                  : currentTime >= stop.arrivalTimestamp
+                                  ? 'Arrived'
+                                  : `ETA: ${formatArrivalTime(stop.arrivalTimestamp)}`}
+                              </span>
+                            </div>
+                          </div>
                   </li>
                 ))}
               </ol>

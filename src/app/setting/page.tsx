@@ -25,53 +25,53 @@ export default function SettingsPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-[85vh] bg-gradient-to-br from-blue-50 via-white to-blue-100 text-black px-4 py-12">
-        <div className="max-w-3xl mx-auto space-y-10">
+      <main className="min-h-[85vh] bg-gradient-to-br from-sky-50 via-white to-blue-100 px-4 py-12 text-gray-800">
+        <div className="max-w-4xl mx-auto space-y-10">
 
-          {/* Page Header */}
-          <section className="relative rounded-2xl bg-blue-100/60 border border-blue-200 p-6 shadow-lg overflow-hidden transition-all hover:shadow-xl">
-            <div className="flex items-center gap-3 relative z-10">
+          {/* 🔧 Settings Header */}
+          <section className="bg-white/70 backdrop-blur border border-blue-100 p-6 rounded-3xl shadow-xl relative overflow-hidden">
+            <div className="flex items-center gap-4 relative z-10">
               <Settings2 className="text-blue-600" size={32} />
               <div>
-                <h1 className="text-3xl sm:text-4xl font-bold text-blue-800">Settings</h1>
-                <p className="text-gray-600 text-sm mt-1">Adjust your app preferences or report an issue.</p>
+                <h1 className="text-3xl font-bold text-blue-900">Settings</h1>
+                <p className="text-sm text-gray-600">Customize preferences or report issues.</p>
               </div>
             </div>
-            <Settings2 size={100} className="absolute top-1 right-4 text-blue-300/20" />
+            <Settings2 size={100} className="absolute top-1 right-3 text-blue-200/20" />
           </section>
 
-          {/* Developer Info */}
-          <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-md hover:shadow-lg transition">
-            <div className="flex items-center gap-4 mb-3">
-              <div className="w-11 h-11 bg-blue-100 text-blue-600 flex items-center justify-center rounded-full shadow-inner">
+          {/* 👨‍💻 Developer Info */}
+          <section className="bg-white p-6 rounded-2xl shadow border border-gray-100 hover:shadow-lg transition">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-100 text-blue-600 flex items-center justify-center rounded-full shadow-inner">
                 <User size={22} />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-800">Developer Info</h2>
+                <h2 className="text-lg font-semibold">Developer</h2>
                 <p className="text-sm text-gray-600">Arjay Tebia</p>
-                <p className="text-xs text-gray-400">Bus Tracker App</p>
+                <p className="text-xs text-gray-400">Bus Tracker Application</p>
               </div>
             </div>
           </section>
 
-          {/* Bug Report */}
-          <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-md hover:shadow-lg transition">
-            <div className="flex items-center gap-3 mb-5">
-              <Bug className="text-red-600" />
-              <h2 className="text-xl font-semibold text-gray-800">Report a Bug</h2>
+          {/* 🐞 Bug Report */}
+          <section className="bg-white p-6 rounded-2xl shadow border border-gray-100 hover:shadow-lg transition">
+            <div className="flex items-center gap-3 mb-4">
+              <Bug className="text-red-500" />
+              <h2 className="text-xl font-semibold">Report a Bug</h2>
             </div>
 
             {submitted ? (
-              <div className="flex items-center gap-3 text-green-700 font-medium bg-green-50 p-4 rounded-lg border border-green-200 shadow animate-fade-in">
+              <div className="flex items-center gap-2 text-green-700 font-medium bg-green-50 p-4 rounded-lg border border-green-200 shadow animate-fade-in">
                 <CheckCircle className="animate-pulse" size={20} />
-                Thank you! Your report has been submitted.
+                Bug report submitted successfully. Thank you!
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6 mt-2">
+              <form onSubmit={handleSubmit} className="space-y-6">
 
-                {/* Name */}
+                {/* Name Input */}
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-800 mb-1">Your Name</label>
+                  <label htmlFor="name" className="block text-sm font-medium mb-1">Your Name</label>
                   <input
                     id="name"
                     name="name"
@@ -84,9 +84,9 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                {/* Section Affected */}
+                {/* Tabs Affected */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-800 mb-2">Which section is affected?</label>
+                  <label className="block text-sm font-medium mb-2">Which section is affected?</label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {['Lines', 'Map', 'Schedule', 'Notification'].map((tab) => (
                       <label
@@ -110,9 +110,9 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                {/* Description */}
+                {/* Bug Description */}
                 <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-800 mb-1">Bug Description</label>
+                  <label htmlFor="description" className="block text-sm font-medium mb-1">Bug Description</label>
                   <textarea
                     id="description"
                     name="description"
@@ -130,7 +130,7 @@ export default function SettingsPage() {
                   type="submit"
                   className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition"
                 >
-                  🪲 Submit Bug Report
+                  Submit Bug Report
                 </button>
               </form>
             )}

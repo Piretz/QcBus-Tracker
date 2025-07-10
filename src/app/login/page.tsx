@@ -14,6 +14,8 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -21,17 +23,19 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
 
       const data = await res.json();
-      console.log("Login response:", res.status, data); // ✅ Debug
+      console.log("Login response:", res.status, data); // ✅ Log for debugging
 
       if (res.ok) {
+        localStorage.setItem('token', data.token);
         Swal.fire({
           icon: 'success',
           title: 'Login Successful!',
@@ -40,7 +44,6 @@ export default function LoginPage() {
           timerProgressBar: true,
           showConfirmButton: false,
         });
-        localStorage.setItem('token', data.token);
         setTimeout(() => router.push('/'), 3500);
       } else {
         Swal.fire({
@@ -49,12 +52,12 @@ export default function LoginPage() {
           text: data.msg || 'Invalid email or password.',
         });
       }
-    } catch (err) {
-      console.error("Login error:", err);
+    } catch (err: any) {
+      console.error("❌ Network/login error:", err);
       Swal.fire({
         icon: 'error',
-        title: 'Something went wrong',
-        text: 'Please try again later.',
+        title: 'Network Error',
+        text: 'Could not connect to server. Please try again later.',
       });
     } finally {
       setLoading(false);
@@ -70,7 +73,7 @@ export default function LoginPage() {
             🔐 Login to Libreng Sakay QC
           </h1>
           <p className="text-center text-gray-600 mb-6 text-sm">
-            Please log in to access the app features like real-time tracking, schedules, and more.
+            Please log in to access real-time tracking, schedules, and more.
           </p>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
@@ -120,7 +123,7 @@ export default function LoginPage() {
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            Don’t have an account?{' '}
+            Don’t have an account?{" "}
             <Link href="/register" className="text-blue-600 hover:underline">
               Register here
             </Link>

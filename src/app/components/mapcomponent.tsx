@@ -5,14 +5,12 @@ import dynamic from 'next/dynamic';
 import { Icon, divIcon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// 🧭 Dynamic Leaflet components
 const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import('react-leaflet').then(m => m.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(m => m.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(m => m.Popup), { ssr: false });
 const Polyline = dynamic(() => import('react-leaflet').then(m => m.Polyline), { ssr: false });
 
-// 🗺️ Route coordinates
 const route1: [number, number][] = [
   [14.6994, 121.0359], [14.6933, 121.0395], [14.6868, 121.0426], [14.6760, 121.0437],
   [14.6700, 121.0505], [14.6549, 121.0526], [14.6474, 121.0563], [14.6396, 121.0560],
@@ -29,14 +27,22 @@ const route3: [number, number][] = [
 
 const allRoutes = [route1, route2, route3];
 
-// 🗺️ Station icon
+const stopLabels = [
+  [
+    'QMC', 'Kalayaan Avenue', 'Tomas Morato', 'St. Luke’s Medical Center',
+    'Trinity University of Asia', 'Welcome Rotonda', 'Araneta City',
+    'Cubao Station', 'Aurora Blvd', 'E. Rodriguez', 'Espana', 'UST',
+  ],
+  ['UST', 'Morayta', 'Quiapo', 'Lawton'],
+  ['Philippine Heart Center', 'East Avenue', 'LTO', 'National Kidney'],
+];
+
 const stationIcon = new Icon({
   iconUrl: '/mark.png',
   iconSize: [32, 32],
   iconAnchor: [16, 32],
 });
 
-// 🚌 Animated bus icon generator
 const generateBusIcon = (id: number) =>
   divIcon({
     html: `<div class="bus-marker">🚌 <span>Bus #${id}</span></div>`,
@@ -45,7 +51,6 @@ const generateBusIcon = (id: number) =>
     iconAnchor: [30, 12],
   });
 
-// 👤 Glowing user icon
 const userIcon = divIcon({
   html: `<div class="user-location-marker"></div>`,
   className: '',
@@ -53,7 +58,19 @@ const userIcon = divIcon({
   iconAnchor: [10, 10],
 });
 
-// 🧾 Bus type
+const getTrafficCondition = (): 'light' | 'moderate' | 'heavy' => {
+  const hour = new Date().getHours();
+  if ((hour >= 7 && hour <= 10) || (hour >= 17 && hour <= 20)) return 'heavy';
+  if ((hour >= 6 && hour < 7) || (hour > 10 && hour <= 16)) return 'moderate';
+  return 'light';
+};
+
+const trafficColors = {
+  light: 'green',
+  moderate: 'orange',
+  heavy: 'red',
+};
+
 type Bus = {
   id: number;
   position: [number, number];
@@ -62,27 +79,31 @@ type Bus = {
 };
 
 export default function MapComponent() {
-  const [isClient, setIsClient] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [buses, setBuses] = useState<Bus[]>([]);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [traffic, setTraffic] = useState<'light' | 'moderate' | 'heavy'>(getTrafficCondition());
 
   useEffect(() => {
-    setIsClient(typeof window !== 'undefined');
+    setMounted(true);
   }, []);
 
-  // 🚍 Simulate real-time bus movement on route1 only
   useEffect(() => {
-    if (!isClient) return;
+    const update = () => setTraffic(getTrafficCondition());
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
+  useEffect(() => {
+    if (!mounted) return;
     const initialBuses = Array.from({ length: 5 }, (_, i) => ({
       id: i + 1,
       position: route1[i],
       routeIndex: i,
       eta: Math.floor(Math.random() * 5) + 2,
     }));
-
     setBuses(initialBuses);
-
     const interval = setInterval(() => {
       setBuses(prev =>
         prev.map(bus => {
@@ -96,14 +117,11 @@ export default function MapComponent() {
         })
       );
     }, 4000);
-
     return () => clearInterval(interval);
-  }, [isClient]);
+  }, [mounted]);
 
-  // 📍 Track user location
   useEffect(() => {
-    if (!isClient || !navigator.geolocation) return;
-
+    if (!mounted || !navigator.geolocation) return;
     const watchId = navigator.geolocation.watchPosition(
       pos => {
         setUserLocation([pos.coords.latitude, pos.coords.longitude]);
@@ -111,14 +129,16 @@ export default function MapComponent() {
       err => console.error('Geolocation error:', err),
       { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
     );
-
     return () => navigator.geolocation.clearWatch(watchId);
-  }, [isClient]);
+  }, [mounted]);
 
-  if (!isClient) return <div className="h-[600px]">Loading map...</div>;
+  if (!mounted) return <div className="h-[600px]">Loading map...</div>;
 
   return (
     <>
+      <div className="text-sm mb-2 text-center font-medium text-black">
+        🚦 Current Traffic: <span style={{ color: trafficColors[traffic] }}>{traffic}</span>
+      </div>
       <div className="w-full h-[600px] rounded-lg overflow-hidden shadow-md">
         <MapContainer center={[14.686, 121.06]} zoom={13} scrollWheelZoom className="h-full w-full">
           <TileLayer
@@ -126,23 +146,25 @@ export default function MapComponent() {
             attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
           />
 
-          {/* 🚏 All Bus Routes */}
           {allRoutes.map((coords, i) => (
             <Polyline
               key={`route-${i}`}
               positions={coords}
-              pathOptions={{ color: 'blue', weight: 5, dashArray: '6 8', opacity: 0.7 }}
+              pathOptions={{ color: trafficColors[traffic], weight: 5, dashArray: '6 8', opacity: 0.7 }}
             />
           ))}
 
-          {/* 🛑 Station Markers for All Routes */}
-          {allRoutes.flat().map(([lat, lng], index) => (
-            <Marker key={`stop-${index}`} position={[lat, lng]} icon={stationIcon}>
-              <Popup>Bus Stop #{index + 1}</Popup>
-            </Marker>
-          ))}
+          {allRoutes.map((coords, routeIdx) =>
+            coords.map(([lat, lng], stopIdx) => (
+              <Marker key={`stop-${routeIdx}-${stopIdx}`} position={[lat, lng]} icon={stationIcon}>
+                <Popup>
+                  <strong>Stop:</strong> {stopLabels[routeIdx]?.[stopIdx] ?? `Stop ${stopIdx + 1}`}<br />
+                  <strong>Route:</strong> #{routeIdx + 1}
+                </Popup>
+              </Marker>
+            ))
+          )}
 
-          {/* 🚌 Animated Bus Markers (route1 only) */}
           {buses.map(bus => (
             <Marker key={bus.id} position={bus.position} icon={generateBusIcon(bus.id)}>
               <Popup>
@@ -153,7 +175,6 @@ export default function MapComponent() {
             </Marker>
           ))}
 
-          {/* 👤 User Location Marker */}
           {userLocation && (
             <Marker position={userLocation} icon={userIcon}>
               <Popup>You are here</Popup>
@@ -162,7 +183,6 @@ export default function MapComponent() {
         </MapContainer>
       </div>
 
-      {/* 🌐 Marker Animations */}
       <style jsx global>{`
         @keyframes pulse {
           0% {
