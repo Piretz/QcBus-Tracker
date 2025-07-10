@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import { Bus, MapPin, Clock, ArrowRight } from "lucide-react";
+import { Bus, MapPin, Clock } from "lucide-react";
 
 type Stop = { name: string; arrivalTimestamp: number };
 type Route = { id: number; name: string; stops: Stop[] };
