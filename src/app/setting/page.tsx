@@ -29,7 +29,7 @@ export default function SettingsPage() {
         <div className="max-w-3xl mx-auto space-y-10">
 
           {/* Page Header */}
-          <div className="relative rounded-2xl bg-blue-100/60 border border-blue-200 p-6 shadow-lg overflow-hidden">
+          <section className="relative rounded-2xl bg-blue-100/60 border border-blue-200 p-6 shadow-lg overflow-hidden transition-all hover:shadow-xl">
             <div className="flex items-center gap-3 relative z-10">
               <Settings2 className="text-blue-600" size={32} />
               <div>
@@ -37,13 +37,11 @@ export default function SettingsPage() {
                 <p className="text-gray-600 text-sm mt-1">Adjust your app preferences or report an issue.</p>
               </div>
             </div>
-            <div className="absolute top-2 right-4 text-blue-200 opacity-20">
-              <Settings2 size={90} />
-            </div>
-          </div>
+            <Settings2 size={100} className="absolute top-1 right-4 text-blue-300/20" />
+          </section>
 
           {/* Developer Info */}
-          <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100 hover:shadow-xl transition">
+          <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-md hover:shadow-lg transition">
             <div className="flex items-center gap-4 mb-3">
               <div className="w-11 h-11 bg-blue-100 text-blue-600 flex items-center justify-center rounded-full shadow-inner">
                 <User size={22} />
@@ -54,10 +52,10 @@ export default function SettingsPage() {
                 <p className="text-xs text-gray-400">Bus Tracker App</p>
               </div>
             </div>
-          </div>
+          </section>
 
           {/* Bug Report */}
-          <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100 hover:shadow-xl transition">
+          <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-md hover:shadow-lg transition">
             <div className="flex items-center gap-3 mb-5">
               <Bug className="text-red-600" />
               <h2 className="text-xl font-semibold text-gray-800">Report a Bug</h2>
@@ -127,7 +125,7 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                {/* Submit */}
+                {/* Submit Button */}
                 <button
                   type="submit"
                   className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition"
@@ -136,7 +134,7 @@ export default function SettingsPage() {
                 </button>
               </form>
             )}
-          </div>
+          </section>
         </div>
       </main>
       <Footer />
