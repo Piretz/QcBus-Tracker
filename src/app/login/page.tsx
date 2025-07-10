@@ -32,7 +32,7 @@ export default function LoginPage() {
       });
 
       const data = await res.json();
-      console.log("Login response:", res.status, data); // ✅ Log for debugging
+      console.log("Login response:", res.status, data);
 
       if (res.ok) {
         localStorage.setItem('token', data.token);
@@ -52,8 +52,12 @@ export default function LoginPage() {
           text: data.msg || 'Invalid email or password.',
         });
       }
-    } catch (err: any) {
-      console.error("❌ Network/login error:", err);
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error("❌ Network/login error:", err.message);
+      } else {
+        console.error("❌ Unknown login error:", err);
+      }
       Swal.fire({
         icon: 'error',
         title: 'Network Error',
