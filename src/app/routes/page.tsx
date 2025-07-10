@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import { Bus, MapPin, Clock } from "lucide-react";
+import { Bus, MapPin, Clock, ArrowRight } from "lucide-react";
 
 type Stop = { name: string; arrivalTimestamp: number };
 type Route = { id: number; name: string; stops: Stop[] };
@@ -108,18 +108,22 @@ export default function RoutesPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-[85vh] bg-gradient-to-br from-blue-100 via-white to-blue-50 px-4 py-12">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <h1 className="text-4xl font-extrabold text-blue-800 flex justify-center items-center gap-2">
-            <Bus className="w-8 h-8 text-blue-600" />
-            Libreng Sakay Tracker
-          </h1>
-          <p className="text-gray-700 text-base md:text-lg max-w-xl mx-auto">
-            View your bus route and get real-time arrival updates
-          </p>
+      <main className="min-h-[85vh] bg-gradient-to-br from-blue-100 via-white to-blue-50 px-4 py-14">
+        <div className="max-w-4xl mx-auto space-y-10 text-center">
+          {/* Header */}
+          <div>
+            <h1 className="text-4xl font-bold text-blue-800 flex justify-center items-center gap-2">
+              <Bus className="w-8 h-8" />
+              Libreng Sakay Route Tracker
+            </h1>
+            <p className="text-gray-700 text-base md:text-lg mt-2">
+              Get real-time arrival updates for your QC Libreng Sakay route
+            </p>
+          </div>
 
+          {/* Route Selector */}
           <div className="text-left w-full">
-            <label className="block text-sm font-medium text-gray-800 mb-2">🧭 Choose your route:</label>
+            <label className="block text-sm font-semibold text-gray-800 mb-2">📍 Select a route:</label>
             <select
               className="w-full px-4 py-3 text-sm rounded-xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900 bg-white"
               value={selectedRouteId ?? ''}
@@ -131,40 +135,50 @@ export default function RoutesPage() {
             </select>
           </div>
 
+          {/* Route Display */}
           {selectedRoute && (
-            <div className="bg-white shadow-xl border border-gray-200 rounded-2xl p-6 w-full text-left">
-              <h2 className="text-2xl font-bold text-blue-900 flex items-center gap-2 mb-4">
-                🛣️ {selectedRoute.name}
-              </h2>
+            <div className="bg-white/90 backdrop-blur-lg shadow-xl border border-gray-200 rounded-2xl px-6 py-8 w-full text-left space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-blue-900 flex items-center gap-2">
+                  🛣️ {selectedRoute.name}
+                </h2>
+                <span className="text-sm text-gray-500 italic">{selectedRoute.stops.length} stops</span>
+              </div>
 
               {isClosed && (
-                <div className="bg-red-100 text-red-700 font-semibold px-4 py-2 rounded-md mb-4 text-sm">
-                  🕘 Bus operations are closed between 9:00 PM and 5:00 AM.
+                <div className="bg-red-100 text-red-700 font-medium px-4 py-2 rounded-md text-sm">
+                  🕘 Buses are not operating between 9:00 PM and 5:00 AM
                 </div>
               )}
 
-              <ol className="space-y-4">
+              {/* Stop List */}
+              <ol className="space-y-5 relative border-l-2 border-blue-200 pl-5">
                 {selectedRoute.stops.map((stop, i) => (
-                  <li key={i} className="bg-blue-50 border border-blue-200 hover:shadow-md rounded-xl p-4 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <MapPin className="w-5 h-5 text-blue-700" />
-                      <span className="text-base font-semibold text-gray-900">{stop.name}</span>
-                    </div>
-                    <div
-                      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold
-                        ${isClosed || stop.arrivalTimestamp === 0
-                          ? 'bg-gray-200 text-gray-600'
-                          : 'bg-green-100 text-green-700 animate-pulse'}
-                      `}
-                    >
-                      <Clock className="w-4 h-4" />
-                      <span>{isClosed || stop.arrivalTimestamp === 0 ? 'Closed' : `ETA: ${formatTime(stop.arrivalTimestamp)}`}</span>
+                  <li key={i} className="relative pl-4">
+                    <span className="absolute -left-[11px] top-1.5 w-3 h-3 bg-blue-600 rounded-full shadow-md"></span>
+                    <div className="flex justify-between items-center">
+                      <div className="text-gray-900 font-semibold flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-blue-700" />
+                        {stop.name}
+                      </div>
+                      <div
+                        className={`text-xs flex items-center gap-2 px-3 py-1 rounded-full font-medium ${
+                          isClosed || stop.arrivalTimestamp === 0
+                            ? 'bg-gray-200 text-gray-600'
+                            : 'bg-green-100 text-green-700 animate-pulse'
+                        }`}
+                      >
+                        <Clock className="w-4 h-4" />
+                        {isClosed || stop.arrivalTimestamp === 0
+                          ? 'Closed'
+                          : `ETA: ${formatTime(stop.arrivalTimestamp)}`}
+                      </div>
                     </div>
                   </li>
                 ))}
               </ol>
 
-              <p className="text-xs text-gray-500 mt-6 text-right">
+              <p className="text-xs text-gray-500 text-right">
                 {isClosed ? 'Live tracking resumes at 5:00 AM' : 'Auto-refreshing every 30 seconds'}
               </p>
             </div>
