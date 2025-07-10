@@ -6,6 +6,15 @@ import Footer from '../components/footer';
 const schedules = [
   {
     route: 'QC Hall to Cubao',
+    stops: [
+      'Quezon City Hall',
+      'East Avenue Medical Center',
+      'National Kidney Institute',
+      'Philippine Heart Center',
+      'EDSA-Kamuning',
+      'Aurora Boulevard',
+      'Cubao / Araneta Center',
+    ],
     monday: '6:00 AM - 9:00 PM',
     tuesday: '6:00 AM - 9:00 PM',
     wednesday: '6:00 AM - 9:00 PM',
@@ -16,6 +25,14 @@ const schedules = [
   },
   {
     route: 'QC Hall to Litex/IBP',
+    stops: [
+      'Quezon City Hall',
+      'Commonwealth Avenue',
+      'Batasan Road',
+      'Litex Market',
+      'Payatas Road',
+      'IBP Road',
+    ],
     monday: '6:00 AM - 8:00 PM',
     tuesday: '6:00 AM - 8:00 PM',
     wednesday: '6:00 AM - 8:00 PM',
@@ -26,6 +43,14 @@ const schedules = [
   },
   {
     route: 'Welcome Rotonda to Katipunan',
+    stops: [
+      'Welcome Rotonda',
+      'Quezon Avenue',
+      'Quezon Memorial Circle',
+      'Philcoa',
+      'UP Campus',
+      'Katipunan Avenue',
+    ],
     monday: '6:00 AM - 9:30 PM',
     tuesday: '6:00 AM - 9:30 PM',
     wednesday: '6:00 AM - 9:30 PM',
@@ -65,7 +90,7 @@ export default function SchedulePage() {
               <thead className="bg-blue-800 text-white sticky top-0 z-30">
                 <tr>
                   <th className="py-4 px-6 text-left font-semibold sticky left-0 z-40 bg-blue-800 w-64">
-                    🛣️ Route
+                    🛣️ Route & Stops
                   </th>
                   {days.map((day) => (
                     <th
@@ -83,15 +108,20 @@ export default function SchedulePage() {
                 {schedules.map((schedule, index) => (
                   <tr
                     key={index}
-                    className="border-t border-gray-200 hover:bg-blue-50 transition duration-150"
+                    className="border-t border-gray-200 hover:bg-blue-50 transition duration-150 align-top"
                   >
-                    <td className="py-4 px-6 text-left font-semibold text-gray-800 sticky left-0 bg-white z-20 border-r border-gray-200">
-                      {schedule.route}
+                    <td className="py-4 px-6 text-left font-semibold text-gray-800 sticky left-0 bg-white z-20 border-r border-gray-200 w-64">
+                      <div className="font-bold text-blue-900">{schedule.route}</div>
+                      <ul className="text-sm text-gray-600 list-disc ml-5 mt-1 space-y-0.5">
+                        {schedule.stops.map((stop, i) => (
+                          <li key={i}>{stop}</li>
+                        ))}
+                      </ul>
                     </td>
                     {days.map((day) => (
                       <td
                         key={day}
-                        className={`py-3 px-3 text-center ${
+                        className={`py-3 px-3 text-center align-middle ${
                           currentDay === day
                             ? 'bg-blue-50 font-semibold text-blue-800'
                             : 'text-gray-700'
