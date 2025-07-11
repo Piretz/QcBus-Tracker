@@ -29,18 +29,20 @@ const allRoutes = [route1, route2, route3];
 
 const stopLabels = [
   [
-    'QMC', 'Kalayaan Avenue', 'Tomas Morato', 'St. Luke’s Medical Center',
-    'Trinity University of Asia', 'Welcome Rotonda', 'Araneta City',
-    'Cubao Station', 'Aurora Blvd', 'E. Rodriguez', 'Espana', 'UST',
-  ],
-  ['UST', 'Morayta', 'Quiapo', 'Lawton'],
-  ['Philippine Heart Center', 'East Avenue', 'LTO', 'National Kidney'],
+    "Quezon Memorial Circle", "Kalayaan Avenue", "Tomas Morato", "St. Luke’s Medical Center",
+    "Trinity University of Asia", "Welcome Rotonda", "University Avenue (UP Diliman)",
+    "CP Garcia Avenue", "UP Town Center", "Katipunan (LRT2 Station)", "Philippine Heart Center",
+    "East Avenue Medical Center", "Land Transportation Office (LTO)", "National Kidney Institute",
+    "Araneta City / Cubao", "Batasan Road (near Sandiganbayan)", "IBP Road", "Commonwealth Avenue",
+    "Litex Market", "Payatas Road Junction", "Novaliches Bayan (Proper)", "Tandang Sora Avenue",
+    "Mindanao Avenue", "Visayas Avenue", "Philcoa", "UP Campus", "Katipunan Avenue", "Balara Area"
+  ]
 ];
 
 const stationIcon = new Icon({
-  iconUrl: '/mark.png',
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
+  iconUrl: '/pin1.png',
+  iconSize: [50,   50],
+  iconAnchor: [20, 38],
 });
 
 const generateBusIcon = (id: number) =>
@@ -150,7 +152,12 @@ export default function MapComponent() {
             <Polyline
               key={`route-${i}`}
               positions={coords}
-              pathOptions={{ color: trafficColors[traffic], weight: 5, dashArray: '6 8', opacity: 0.7 }}
+              pathOptions={{
+                color: 'blue',
+                weight: 6,
+                dashArray: '4 6',
+                opacity: 0.8,
+              }}
             />
           ))}
 
@@ -182,8 +189,6 @@ export default function MapComponent() {
           )}
         </MapContainer>
       </div>
-
-     
     </>
   );
 }

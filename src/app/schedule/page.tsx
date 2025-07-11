@@ -5,15 +5,14 @@ import Footer from '../components/footer';
 
 const schedules = [
   {
-    route: 'QC Hall to Cubao',
+    route: 'Quezon Memorial Circle ➝ East Avenue Medical Center',
     stops: [
-      'Quezon City Hall',
+      'Quezon Memorial Circle',
+      'Kalayaan Avenue',
+      'Tomas Morato',
+      'St. Luke’s Medical Center',
+      'Trinity University of Asia',
       'East Avenue Medical Center',
-      'National Kidney Institute',
-      'Philippine Heart Center',
-      'EDSA-Kamuning',
-      'Aurora Boulevard',
-      'Cubao / Araneta Center',
     ],
     monday: '6:00 AM - 9:00 PM',
     tuesday: '6:00 AM - 9:00 PM',
@@ -24,14 +23,14 @@ const schedules = [
     sunday: '8:00 AM - 8:00 PM',
   },
   {
-    route: 'QC Hall to Litex/IBP',
+    route: 'Batasan Road ➝ IBP Road',
     stops: [
-      'Quezon City Hall',
-      'Commonwealth Avenue',
-      'Batasan Road',
-      'Litex Market',
-      'Payatas Road',
+      'Batasan Road (Sandiganbayan)',
       'IBP Road',
+      'Commonwealth Avenue',
+      'Litex Market',
+      'Payatas Road Junction',
+      'Novaliches Bayan (Proper)',
     ],
     monday: '6:00 AM - 8:00 PM',
     tuesday: '6:00 AM - 8:00 PM',
@@ -42,14 +41,15 @@ const schedules = [
     sunday: '8:00 AM - 7:00 PM',
   },
   {
-    route: 'Welcome Rotonda to Katipunan',
+    route: 'Welcome Rotonda ➝ Katipunan (LRT2)',
     stops: [
       'Welcome Rotonda',
       'Quezon Avenue',
       'Quezon Memorial Circle',
-      'Philcoa',
-      'UP Campus',
-      'Katipunan Avenue',
+      'University Avenue (UP Diliman)',
+      'CP Garcia Avenue',
+      'UP Town Center',
+      'Katipunan (LRT2 Station)',
     ],
     monday: '6:00 AM - 9:30 PM',
     tuesday: '6:00 AM - 9:30 PM',
@@ -77,7 +77,8 @@ export default function SchedulePage() {
               🕒 Libreng Sakay Bus Schedules
             </h1>
             <p className="text-gray-700 text-sm md:text-base mt-3 max-w-xl mx-auto">
-              View operating hours for each route. <br />
+              View operating hours for each route.
+              <br />
               <span className="inline-flex items-center gap-1 text-blue-700 font-medium mt-1">
                 <span className="h-2 w-2 rounded-full bg-yellow-400 animate-pulse" />
                 Today’s schedule is highlighted.

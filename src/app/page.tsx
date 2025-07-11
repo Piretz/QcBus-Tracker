@@ -1,9 +1,25 @@
 'use client';
+
+import { useEffect, useState } from "react";
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
 import Link from "next/link";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./lib/firebase";
 
 export default function HomePage() {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user);
+      setCheckingAuth(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   return (
     <>
       <Navbar />
@@ -19,11 +35,23 @@ export default function HomePage() {
             <p className="text-lg md:text-xl mb-6 max-w-2xl mx-auto text-white/90">
               Real-time tracking, live schedules, and free rides across Quezon City.
             </p>
-            <Link href="/register">
-              <button className="bg-yellow-400 text-black font-semibold px-8 py-3 rounded-full hover:bg-yellow-300 transition-all transform hover:scale-105 shadow-xl">
-                🗺️ Get Started
-              </button>
-            </Link>
+
+            {!checkingAuth && (
+              isLoggedIn ? (
+                <button
+                  disabled
+                  className="bg-gray-400 text-white font-semibold px-8 py-3 rounded-full shadow-xl cursor-not-allowed opacity-70"
+                >
+                  ✅ You&apos;re already registered
+                </button>
+              ) : (
+                <Link href="/register">
+                  <button className="bg-yellow-400 text-black font-semibold px-8 py-3 rounded-full hover:bg-yellow-300 transition-all transform hover:scale-105 shadow-xl">
+                    🗺️ Get Started
+                  </button>
+                </Link>
+              )
+            )}
           </div>
         </section>
 

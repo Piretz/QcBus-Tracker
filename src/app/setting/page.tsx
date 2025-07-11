@@ -4,6 +4,7 @@ import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 import { useState } from 'react';
 import { Bug, CheckCircle, Settings2 } from 'lucide-react';
+import Image from 'next/image'; // ✅ Added for next/image
 
 export default function SettingsPage() {
   const [form, setForm] = useState({ name: '', tab: '', description: '' });
@@ -13,32 +14,32 @@ export default function SettingsPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  try {
-    const res = await fetch('https://formspree.io/f/mkgbdzok', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: form.name,
-        section: form.tab,
-        description: form.description,
-      }),
-    });
+    try {
+      const res = await fetch('https://formspree.io/f/mkgbdzok', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          section: form.tab,
+          description: form.description,
+        }),
+      });
 
-    if (res.ok) {
-      setSubmitted(true);
-      setForm({ name: '', tab: '', description: '' });
-      setTimeout(() => setSubmitted(false), 5000);
-    } else {
-      alert('Failed to send bug report.');
+      if (res.ok) {
+        setSubmitted(true);
+        setForm({ name: '', tab: '', description: '' });
+        setTimeout(() => setSubmitted(false), 5000);
+      } else {
+        alert('Failed to send bug report.');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('An error occurred. Try again later.');
     }
-  } catch (error) {
-    console.error(error);
-    alert('An error occurred. Try again later.');
-  }
-};
+  };
 
   return (
     <>
@@ -58,28 +59,29 @@ export default function SettingsPage() {
             <Settings2 size={100} className="absolute top-1 right-3 text-blue-200/20" />
           </section>
 
-        {/* 👨‍💻 Developer Info */}
-              <section className="bg-white p-6 rounded-2xl shadow border border-gray-100 hover:shadow-lg transition">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full overflow-hidden shadow-inner border border-gray-200">
-                    <img
-                      src="/tebia.jpg"
-                      alt="Arjay Tebia"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h2 className="text-l font-semibold">Developer</h2>
-                    <p className="text-l text-blue-600 hover:underline">
-                      <a href="https://www.linkedin.com/in/tebia-arjay-827056231/" target="_blank" rel="noopener noreferrer">
-                        Arjay Tebia
-                      </a>
-                    </p>
-                    <p className="text-l text-gray-700">Bus Tracker Application</p>
-                  </div>
-                </div>
-              </section>
-
+          {/* 👨‍💻 Developer Info */}
+          <section className="bg-white p-6 rounded-2xl shadow border border-gray-100 hover:shadow-lg transition">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full overflow-hidden shadow-inner border border-gray-200 relative">
+                <Image
+                  src="/tebia.jpg"
+                  alt="Arjay Tebia"
+                  layout="fill"
+                  objectFit="cover"
+                  className="rounded-full"
+                />
+              </div>
+              <div>
+                <h2 className="text-l font-semibold">Developer</h2>
+                <p className="text-l text-blue-600 hover:underline">
+                  <a href="https://www.linkedin.com/in/tebia-arjay-827056231/" target="_blank" rel="noopener noreferrer">
+                    Arjay Tebia
+                  </a>
+                </p>
+                <p className="text-l text-gray-700">Bus Tracker Application</p>
+              </div>
+            </div>
+          </section>
 
           {/* 🐞 Bug Report */}
           <section className="bg-white p-6 rounded-2xl shadow border border-gray-100 hover:shadow-lg transition">
@@ -95,8 +97,6 @@ export default function SettingsPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
-
-                {/* Name Input */}
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium mb-1">Your Name</label>
                   <input
@@ -110,13 +110,11 @@ export default function SettingsPage() {
                     required
                   />
                 </div>
-                        {/* Tabs Affected */}
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Which section is affected?</label>
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                            {['Home', 'Routes', 'Schedule', 'Map', 'Notification'].map((tab) => (
 
-
+                <div>
+                  <label className="block text-sm font-medium mb-2">Which section is affected?</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {['Home', 'Routes', 'Schedule', 'Map', 'Notification'].map((tab) => (
                       <label
                         key={tab}
                         className={`text-sm px-3 py-2 rounded-lg border text-center font-medium cursor-pointer transition
@@ -138,7 +136,6 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                {/* Bug Description */}
                 <div>
                   <label htmlFor="description" className="block text-sm font-medium mb-1">Bug Description</label>
                   <textarea
@@ -153,7 +150,6 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                {/* Submit Button */}
                 <button
                   type="submit"
                   className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition"
