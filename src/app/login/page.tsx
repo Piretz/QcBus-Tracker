@@ -6,14 +6,15 @@ import Footer from "../components/footer";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../lib/firebase"; // Ensure this path is correct
+import { auth } from "../lib/firebase";
+import { FirebaseError } from "firebase/app";
 
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,29 +30,37 @@ export default function LoginPage() {
       const user = userCredential.user;
 
       Swal.fire({
-        icon: 'success',
-        title: 'Login Successful!',
-        text: `Welcome back, ${user.displayName || 'User'}!`,
+        icon: "success",
+        title: "Login Successful!",
+        text: `Welcome back, ${user.displayName || "User"}!`,
         timer: 3000,
         timerProgressBar: true,
         showConfirmButton: false,
       });
 
-      setTimeout(() => router.push('/'), 3500);
-    } catch (err: any) {
+      setTimeout(() => router.push("/"), 3500);
+    } catch (err: unknown) {
       console.error("Firebase login error:", err);
 
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        Swal.fire({
-          icon: 'error',
-          title: 'Login Failed',
-          text: 'Incorrect email or password.',
-        });
+      if (err instanceof FirebaseError) {
+        if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
+          Swal.fire({
+            icon: "error",
+            title: "Login Failed",
+            text: "Incorrect email or password.",
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Login Failed",
+            text: err.message || "Something went wrong. Please try again.",
+          });
+        }
       } else {
         Swal.fire({
-          icon: 'error',
-          title: 'Login Failed',
-          text: err.message || 'Something went wrong. Please try again.',
+          icon: "error",
+          title: "Login Failed",
+          text: "An unknown error occurred. Please try again.",
         });
       }
     } finally {
@@ -113,7 +122,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full bg-blue-700 text-white py-2 rounded-lg hover:bg-blue-800 transition disabled:opacity-50"
             >
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
 

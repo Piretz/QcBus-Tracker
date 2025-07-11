@@ -9,10 +9,8 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import * as yup from "yup";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "../lib/firebase"; // Adjust the import path as necessary
-
-
-
+import { auth } from "../lib/firebase";
+import { FirebaseError } from "firebase/app";
 
 // ✅ Yup Validation Schema
 const validationSchema = yup.object().shape({
@@ -29,7 +27,7 @@ const validationSchema = yup.object().shape({
 export default function RegisterPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,34 +45,40 @@ export default function RegisterPage() {
       await updateProfile(userCredential.user, { displayName: form.name });
 
       Swal.fire({
-        icon: 'success',
-        title: 'Registered Successfully!',
-        text: 'You will be redirected shortly.',
+        icon: "success",
+        title: "Registered Successfully!",
+        text: "You will be redirected shortly.",
         timer: 3500,
         showConfirmButton: false,
         timerProgressBar: true,
       });
 
-      setTimeout(() => router.push('/login'), 4000);
-    } catch (err: any) {
+      setTimeout(() => router.push("/login"), 4000);
+    } catch (err: unknown) {
       if (err instanceof yup.ValidationError) {
         Swal.fire({
-          icon: 'warning',
-          title: 'Validation Error',
-          html: err.errors.join('<br>'),
+          icon: "warning",
+          title: "Validation Error",
+          html: err.errors.join("<br>"),
         });
-      } else if (err.code === 'auth/email-already-in-use') {
+      } else if (err instanceof FirebaseError && err.code === "auth/email-already-in-use") {
         Swal.fire({
-          icon: 'error',
-          title: 'Email Already Registered',
-          text: 'This email is already in use. Try logging in instead.',
+          icon: "error",
+          title: "Email Already Registered",
+          text: "This email is already in use. Try logging in instead.",
         });
-      } else {
+      } else if (err instanceof FirebaseError) {
         console.error("Firebase registration error:", err);
         Swal.fire({
-          icon: 'error',
-          title: 'Registration Failed',
-          text: err.message || 'Something went wrong. Please try again.',
+          icon: "error",
+          title: "Registration Failed",
+          text: err.message || "Something went wrong. Please try again.",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Registration Failed",
+          text: "An unknown error occurred. Please try again.",
         });
       }
     } finally {
@@ -147,7 +151,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full bg-blue-700 text-white py-2 rounded-lg hover:bg-blue-800 transition disabled:opacity-50"
             >
-              {loading ? 'Registering...' : 'Register'}
+              {loading ? "Registering..." : "Register"}
             </button>
           </form>
 
