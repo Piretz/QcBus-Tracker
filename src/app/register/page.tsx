@@ -8,6 +8,11 @@ import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import * as yup from "yup";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "../lib/firebase"; // Adjust the import path as necessary
+
+
+
 
 // ✅ Yup Validation Schema
 const validationSchema = yup.object().shape({
@@ -36,48 +41,40 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      // ✅ Validate form
       await validationSchema.validate(form, { abortEarly: false });
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+      const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password);
+      await updateProfile(userCredential.user, { displayName: form.name });
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Registered Successfully!',
+        text: 'You will be redirected shortly.',
+        timer: 3500,
+        showConfirmButton: false,
+        timerProgressBar: true,
       });
 
-      const data = await res.json();
-      console.log("Register response:", res.status, data); // ✅ Debug
-
-      if (res.ok) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Registered Successfully!',
-          text: 'You will be redirected shortly.',
-          timer: 3500,
-          showConfirmButton: false,
-          timerProgressBar: true,
-        });
-        setTimeout(() => router.push('/login'), 4000);
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Registration Failed',
-          text: data.msg || 'Please try again.',
-        });
-      }
-    } catch (err) {
+      setTimeout(() => router.push('/login'), 4000);
+    } catch (err: any) {
       if (err instanceof yup.ValidationError) {
         Swal.fire({
           icon: 'warning',
           title: 'Validation Error',
           html: err.errors.join('<br>'),
         });
-      } else {
-        console.error("Registration error:", err);
+      } else if (err.code === 'auth/email-already-in-use') {
         Swal.fire({
           icon: 'error',
-          title: 'Network Error',
-          text: 'Something went wrong. Please try again.',
+          title: 'Email Already Registered',
+          text: 'This email is already in use. Try logging in instead.',
+        });
+      } else {
+        console.error("Firebase registration error:", err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Registration Failed',
+          text: err.message || 'Something went wrong. Please try again.',
         });
       }
     } finally {

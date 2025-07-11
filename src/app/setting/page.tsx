@@ -13,14 +13,32 @@ export default function SettingsPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Bug Report Submitted:', form);
-    setSubmitted(true);
-    setForm({ name: '', tab: '', description: '' });
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    setTimeout(() => setSubmitted(false), 5000);
-  };
+  try {
+    const res = await fetch('https://formspree.io/f/mkgbdzok', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: form.name,
+        section: form.tab,
+        description: form.description,
+      }),
+    });
+
+    if (res.ok) {
+      setSubmitted(true);
+      setForm({ name: '', tab: '', description: '' });
+      setTimeout(() => setSubmitted(false), 5000);
+    } else {
+      alert('Failed to send bug report.');
+    }
+  } catch (error) {
+    console.error(error);
+    alert('An error occurred. Try again later.');
+  }
+};
 
   return (
     <>
@@ -83,12 +101,13 @@ export default function SettingsPage() {
                     required
                   />
                 </div>
+                        {/* Tabs Affected */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Which section is affected?</label>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {['Home', 'Routes', 'Schedule', 'Map', 'Notification'].map((tab) => (
 
-                {/* Tabs Affected */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Which section is affected?</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {['Lines', 'Map', 'Schedule', 'Notification'].map((tab) => (
+
                       <label
                         key={tab}
                         className={`text-sm px-3 py-2 rounded-lg border text-center font-medium cursor-pointer transition

@@ -7,14 +7,14 @@ import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Swal from 'sweetalert2';
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../lib/firebase"; // Ensure this path is correct
 
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -25,44 +25,35 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+      const userCredential = await signInWithEmailAndPassword(auth, form.email, form.password);
+      const user = userCredential.user;
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Login Successful!',
+        text: `Welcome back, ${user.displayName || 'User'}!`,
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false,
       });
 
-      const data = await res.json();
-      console.log("Login response:", res.status, data);
+      setTimeout(() => router.push('/'), 3500);
+    } catch (err: any) {
+      console.error("Firebase login error:", err);
 
-      if (res.ok) {
-        localStorage.setItem('token', data.token);
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
         Swal.fire({
-          icon: 'success',
-          title: 'Login Successful!',
-          text: data.msg || 'You will be redirected shortly.',
-          timer: 3000,
-          timerProgressBar: true,
-          showConfirmButton: false,
+          icon: 'error',
+          title: 'Login Failed',
+          text: 'Incorrect email or password.',
         });
-        setTimeout(() => router.push('/'), 3500);
       } else {
         Swal.fire({
           icon: 'error',
           title: 'Login Failed',
-          text: data.msg || 'Invalid email or password.',
+          text: err.message || 'Something went wrong. Please try again.',
         });
       }
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error("❌ Network/login error:", err.message);
-      } else {
-        console.error("❌ Unknown login error:", err);
-      }
-      Swal.fire({
-        icon: 'error',
-        title: 'Network Error',
-        text: 'Could not connect to server. Please try again later.',
-      });
     } finally {
       setLoading(false);
     }
