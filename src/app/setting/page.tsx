@@ -3,7 +3,7 @@
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 import { useState } from 'react';
-import { Bug, CheckCircle, User, Settings2 } from 'lucide-react';
+import { Bug, CheckCircle, Settings2 } from 'lucide-react';
 
 export default function SettingsPage() {
   const [form, setForm] = useState({ name: '', tab: '', description: '' });
@@ -58,19 +58,28 @@ export default function SettingsPage() {
             <Settings2 size={100} className="absolute top-1 right-3 text-blue-200/20" />
           </section>
 
-          {/* 👨‍💻 Developer Info */}
-          <section className="bg-white p-6 rounded-2xl shadow border border-gray-100 hover:shadow-lg transition">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-100 text-blue-600 flex items-center justify-center rounded-full shadow-inner">
-                <User size={22} />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold">Developer</h2>
-                <p className="text-sm text-gray-600">Arjay Tebia</p>
-                <p className="text-xs text-gray-400">Bus Tracker Application</p>
-              </div>
-            </div>
-          </section>
+        {/* 👨‍💻 Developer Info */}
+              <section className="bg-white p-6 rounded-2xl shadow border border-gray-100 hover:shadow-lg transition">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full overflow-hidden shadow-inner border border-gray-200">
+                    <img
+                      src="/tebia.jpg"
+                      alt="Arjay Tebia"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <h2 className="text-l font-semibold">Developer</h2>
+                    <p className="text-l text-blue-600 hover:underline">
+                      <a href="https://www.linkedin.com/in/tebia-arjay-827056231/" target="_blank" rel="noopener noreferrer">
+                        Arjay Tebia
+                      </a>
+                    </p>
+                    <p className="text-l text-gray-700">Bus Tracker Application</p>
+                  </div>
+                </div>
+              </section>
+
 
           {/* 🐞 Bug Report */}
           <section className="bg-white p-6 rounded-2xl shadow border border-gray-100 hover:shadow-lg transition">
