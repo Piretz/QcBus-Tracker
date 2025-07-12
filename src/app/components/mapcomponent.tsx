@@ -160,17 +160,42 @@ export default function MapComponent() {
               }}
             />
           ))}
+          
+{allRoutes.map((coords, routeIdx) =>
+  coords.map(([lat, lng], stopIdx) => {
+    const stopName = stopLabels[routeIdx]?.[stopIdx] ?? `Stop ${stopIdx + 1}`;
+    return (
+      <Marker key={`stop-${routeIdx}-${stopIdx}`} position={[lat, lng]} icon={stationIcon}>
+        <Popup maxWidth={250}>
+          <div style={{
+            fontFamily: 'Arial, sans-serif',
+            padding: '8px',
+            borderRadius: '8px',
+            backgroundColor: '#f9f9f9',
+            color: '#333',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+          }}>
+            <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '6px', color: '#1a202c' }}>
+              📍 {stopName}
+            </div>
+            <div style={{ fontSize: '14px', marginBottom: '4px' }}>
+              🛣️ <strong>Route:</strong> <span style={{ color: '#2563eb' }}>#{routeIdx + 1}</span>
+            </div>
+            <div style={{ fontSize: '13px', color: '#4b5563' }}>
+              📌 <em>Click on other stops to explore nearby stations.</em>
+            </div>
+            <hr style={{ margin: '8px 0', borderColor: '#e5e7eb' }} />
+            <div style={{ fontSize: '13px', color: '#6b7280' }}>
+              🗓️ Last Updated: <span>{new Date().toLocaleTimeString()}</span><br />
+              📶 Status: <span style={{ color: 'green', fontWeight: 'bold' }}>Active</span>
+            </div>
+          </div>
+        </Popup>
+      </Marker>
+    );
+  })
+)}
 
-          {allRoutes.map((coords, routeIdx) =>
-            coords.map(([lat, lng], stopIdx) => (
-              <Marker key={`stop-${routeIdx}-${stopIdx}`} position={[lat, lng]} icon={stationIcon}>
-                <Popup>
-                  <strong>Stop:</strong> {stopLabels[routeIdx]?.[stopIdx] ?? `Stop ${stopIdx + 1}`}<br />
-                  <strong>Route:</strong> #{routeIdx + 1}
-                </Popup>
-              </Marker>
-            ))
-          )}
 
           {buses.map(bus => (
             <Marker key={bus.id} position={bus.position} icon={generateBusIcon(bus.id)}>

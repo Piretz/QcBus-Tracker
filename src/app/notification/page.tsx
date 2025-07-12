@@ -1,3 +1,4 @@
+// NotificationsPage.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -25,12 +26,27 @@ interface Bus {
 }
 
 const fetchBusLocations = (): Promise<Bus[]> =>
-  new Promise((resolve) => {
+  new Promise(resolve => {
     setTimeout(() => {
       resolve([
-        { id: 1, lat: 14.651 + Math.random() * 0.002, lng: 121.049 + Math.random() * 0.002, route: 'UP Diliman - City Hall' },
-        { id: 2, lat: 14.654 + Math.random() * 0.002, lng: 121.060 + Math.random() * 0.002, route: 'Quezon Ave - Welcome Rotonda' },
-        { id: 3, lat: 14.646 + Math.random() * 0.002, lng: 121.050 + Math.random() * 0.002, route: 'QC Hall - East Ave' },
+        {
+          id: 1,
+          lat: 14.651 + Math.random() * 0.002,
+          lng: 121.049 + Math.random() * 0.002,
+          route: 'UP Diliman – City Hall',
+        },
+        {
+          id: 2,
+          lat: 14.654 + Math.random() * 0.002,
+          lng: 121.06 + Math.random() * 0.002,
+          route: 'Quezon Ave – Welcome Rotonda',
+        },
+        {
+          id: 3,
+          lat: 14.646 + Math.random() * 0.002,
+          lng: 121.05 + Math.random() * 0.002,
+          route: 'QC Hall – East Ave',
+        },
       ]);
     }, 1000);
   });
@@ -40,9 +56,16 @@ function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: num
   const R = 6371;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
+}
+
+function estimateETA(distanceKm: number, traffic: 'light' | 'moderate' | 'heavy') {
+  const speedKph = traffic === 'light' ? 30 : traffic === 'moderate' ? 20 : 10;
+  return Math.max(1, Math.ceil((distanceKm / speedKph) * 60));
 }
 
 const destination: Location = {
@@ -51,39 +74,40 @@ const destination: Location = {
 };
 
 function getTrafficCondition(): 'light' | 'moderate' | 'heavy' {
-  const hour = new Date().getHours();
-  if ((hour >= 7 && hour <= 10) || (hour >= 17 && hour <= 20)) return 'heavy';
-  if ((hour >= 6 && hour < 7) || (hour > 10 && hour <= 16)) return 'moderate';
+  const hr = new Date().getHours();
+  if ((hr >= 7 && hr <= 10) || (hr >= 17 && hr <= 20)) return 'heavy';
+  if ((hr >= 6 && hr < 7) || (hr > 10 && hr <= 16)) return 'moderate';
   return 'light';
 }
 
-function triggerFeedback() {
-  if ('vibrate' in navigator) {
-    navigator.vibrate(300);
-  }
-
-  const audio = new Audio('/notification.mp3');
-  audio.play().catch((err) => {
-    console.log('Sound play error:', err);
-  });
+function triggerFeedback(kind: 'alert' | 'bus') {
+  if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+  const src = kind === 'alert' ? '/alert.mp3' : '/notification.mp3';
+  const audio = new Audio(src);
+  audio.play().catch(() => {});
 }
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [userLocation, setUserLocation] = useState<Location | null>(null);
-  const [notifiedBusIds, setNotifiedBusIds] = useState<Set<number>>(new Set());
-  const [lastTraffic, setLastTraffic] = useState<string | null>(null);
+  const [notifiedIds, setNotifiedIds] = useState<Set<number>>(new Set());
+  const [lastTraffic, setLastTraffic] = useState<'light' | 'moderate' | 'heavy' | null>(null);
 
   useEffect(() => {
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        },
-        (err) => console.error('Location error:', err),
-        { enableHighAccuracy: true }
-      );
+    if (!('geolocation' in navigator)) {
+      alert('Geolocation is not supported or enabled on your browser.');
+      return;
     }
+
+    const watchId = navigator.geolocation.watchPosition(
+      pos => {
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
+      err => console.error('Location error:', err),
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
   useEffect(() => {
@@ -91,10 +115,10 @@ export default function NotificationsPage() {
 
     const interval = setInterval(async () => {
       const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
       const currentTraffic = getTrafficCondition();
+
       if (currentTraffic !== lastTraffic) {
-        setNotifications((prev) => [
+        setNotifications(prev => [
           {
             id: Date.now(),
             message: `🚦 Traffic update: ${currentTraffic.toUpperCase()} traffic conditions.`,
@@ -104,66 +128,71 @@ export default function NotificationsPage() {
           ...prev,
         ]);
         setLastTraffic(currentTraffic);
+        triggerFeedback('alert');
       }
 
       const buses = await fetchBusLocations();
-      const newNotified = new Set(notifiedBusIds);
+      const nextNotified = new Set(notifiedIds);
 
-      buses.forEach((bus) => {
-        const userDistance = calculateDistanceKm(userLocation.lat, userLocation.lng, bus.lat, bus.lng);
-        const destDistance = calculateDistanceKm(destination.lat, destination.lng, bus.lat, bus.lng);
+      buses.forEach(bus => {
+        const userDist = calculateDistanceKm(userLocation.lat, userLocation.lng, bus.lat, bus.lng);
+        const destDist = calculateDistanceKm(destination.lat, destination.lng, bus.lat, bus.lng);
+        const etaToUser = estimateETA(userDist, currentTraffic);
+        const etaToDest = estimateETA(destDist, currentTraffic);
 
-        // 🟡 Bus is on the way (between 0.8 and 2km)
-        if (userDistance > 0.8 && userDistance <= 2 && !notifiedBusIds.has(bus.id + 2000)) {
-          setNotifications((prev) => [
+        const ID_NEAR = bus.id;
+        const ID_ON_WAY = bus.id + 2000;
+        const ID_DEST = bus.id + 4000;
+
+        if (userDist > 0.5 && userDist <= 1.2 && !notifiedIds.has(ID_ON_WAY)) {
+          setNotifications(prev => [
             {
               id: Date.now(),
-              message: `🚌 Bus #${bus.id} is on the way to your location!\n🗺️ ${bus.route}`,
+              message: `🚌 Bus #${bus.id} is on the way – ETA ${etaToUser} min\n🗺️ ${bus.route}`,
               type: 'bus',
               time: now,
             },
             ...prev,
           ]);
-          newNotified.add(bus.id + 2000);
-          triggerFeedback();
+          nextNotified.add(ID_ON_WAY);
+          triggerFeedback('bus');
         }
 
-        // 🔵 Bus is very near
-        if (userDistance <= 0.8 && !notifiedBusIds.has(bus.id)) {
-          setNotifications((prev) => [
+        if (userDist <= 0.5 && !notifiedIds.has(ID_NEAR)) {
+          setNotifications(prev => [
             {
               id: Date.now(),
-              message: `📍 Bus #${bus.id} is near your current location!\n🗺️ ${bus.route}`,
+              message: `📍 Bus #${bus.id} is very close! ETA ${etaToUser} min\n🗺️ ${bus.route}`,
               type: 'bus',
               time: now,
             },
             ...prev,
           ]);
-          newNotified.add(bus.id);
-          triggerFeedback();
+          nextNotified.add(ID_NEAR);
+          triggerFeedback('bus');
         }
 
-        // 🏁 Approaching destination
-        if (destDistance <= 0.8 && !notifiedBusIds.has(bus.id + 1000)) {
-          setNotifications((prev) => [
+        if (destDist <= 0.8 && !notifiedIds.has(ID_DEST)) {
+          setNotifications(prev => [
             {
               id: Date.now(),
-              message: `📍 Bus #${bus.id} is approaching your destination!\n🗺️ ${bus.route}`,
+              message: `🏁 Bus #${bus.id} is nearing your destination – ETA ${etaToDest} min\n🗺️ ${bus.route}`,
               type: 'bus',
               time: now,
             },
             ...prev,
           ]);
-          newNotified.add(bus.id + 1000);
-          triggerFeedback();
+          nextNotified.add(ID_DEST);
+          triggerFeedback('bus');
         }
       });
 
-      setNotifiedBusIds(newNotified);
+      setNotifications(prev => prev.slice(0, 15));
+      setNotifiedIds(nextNotified);
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [userLocation, notifiedBusIds, lastTraffic]);
+  }, [userLocation, notifiedIds, lastTraffic]);
 
   return (
     <>
@@ -175,13 +204,19 @@ export default function NotificationsPage() {
             Live Notifications
           </h1>
 
+          <div className="text-xs text-gray-500 mb-4">
+            {userLocation
+              ? `📍 Tracking at (${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)})`
+              : '📍 Waiting for location permission…'}
+          </div>
+
           {notifications.length === 0 ? (
             <div className="text-gray-600 text-sm mt-8">
-              No alerts yet. We’ll notify you once a bus is near your location or destination!
+              No alerts yet – we’ll let you know once something happens nearby!
             </div>
           ) : (
             <ul className="mt-8 space-y-4 text-left">
-              {notifications.map((note) => (
+              {notifications.map(note => (
                 <li
                   key={note.id}
                   className={`rounded-xl border shadow-md p-4 flex gap-4 items-start transition ${
