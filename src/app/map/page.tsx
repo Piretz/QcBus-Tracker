@@ -16,7 +16,7 @@ export default function MapPage() {
         <div className="max-w-6xl mx-auto text-center mb-8">
           <h1 className="text-4xl font-bold text-blue-800 mb-2">🗺️ Real-Time Bus Tracker</h1>
           <p className="text-gray-600 text-sm">
-            See where all Libreng Sakay QC buses are located in Metro Manila.
+            See where all Libreng Sakay QC buses are located in Quezon City
           </p>
         </div>
 

@@ -11,13 +11,15 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'Routes', path: '/routes' },
-    { name: 'Schedule', path: '/schedule' },
-    { name: 'Map', path: '/map' },
-    { name: 'Notification', path: '/notification' },
-    { name: 'Setting', path: '/setting' },
-  ];
+  { name: 'Home', path: '/' },
+  { name: 'Routes', path: '/routes' },
+  { name: 'Schedule', path: '/schedule' },
+  { name: 'Map', path: '/map' },
+  { name: 'Notification', path: '/notification' },
+  { name: 'Setting', path: '/setting' },
+  { name: 'Profile', path: '/profile' }, // 👈 added
+];
+
 
   useEffect(() => {
     const hasRequestedLocation = localStorage.getItem('locationRequested');
